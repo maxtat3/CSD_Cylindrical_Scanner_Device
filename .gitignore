@@ -31,7 +31,7 @@
 
 # Debug files
 *.dSYM/
-.dep/*
+.dep/
 
 # Other generated files
 *.eep
