@@ -98,3 +98,7 @@ crashlytics-build.properties
 
 # pcb module archives and other zip archives
 .zip
+
+### Information ###
+.~lock.help.odt#
+info/*.pdf
