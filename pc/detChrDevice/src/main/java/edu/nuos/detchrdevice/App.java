@@ -1,5 +1,14 @@
 package edu.nuos.detchrdevice;
 
+import info.monitorenter.gui.chart.Chart2D;
+import info.monitorenter.gui.chart.IAxis;
+import info.monitorenter.gui.chart.IRangePolicy;
+import info.monitorenter.gui.chart.ITrace2D;
+import info.monitorenter.gui.chart.axis.scalepolicy.AxisScalePolicyManualTicks;
+import info.monitorenter.gui.chart.labelformatters.LabelFormatterNumber;
+import info.monitorenter.gui.chart.rangepolicies.RangePolicyFixedViewport;
+import info.monitorenter.gui.chart.traces.Trace2DLtd;
+import info.monitorenter.util.Range;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
@@ -8,6 +17,8 @@ import jssc.SerialPortException;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 
 /**
@@ -22,12 +33,14 @@ public class App {
 	public static final String [] startMsrCmd = {"a", "q", "l"};
 	public static final String [] stopMsrCmd = {"a", "b", "k"};
 
+	private JTextField jtfRS232Port = new JTextField(COM_PORT);
 	private JTextArea jtaLogDataADC;
+	private ITrace2D trace = new Trace2DLtd(200);
+
 	private SerialPort serialPort;
-	private boolean isStartMeasuring = false;
+	private boolean isStartMsr = false;
 	private int[] receiveDataArr;
 	private StringBuilder logData = new StringBuilder();
-	private JTextField jtfRS232Port = new JTextField(COM_PORT);
 
 
 	public App() {
@@ -41,32 +54,24 @@ public class App {
 //        jp.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		jp.setLayout(new BoxLayout(jp, BoxLayout.Y_AXIS));
 
-		final JButton btnRunSM = new JButton(BTN_LABEL_START);
-		btnRunSM.addActionListener(new AbstractAction() {
+		final JButton btnRunMsr = new JButton(BTN_LABEL_START);
+		btnRunMsr.addActionListener(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
                 /* запуск измерений */
-				if (btnRunSM.getText().equals(BTN_LABEL_START)) {
+				if (btnRunMsr.getText().equals(BTN_LABEL_START)) {
 					try {
-//                        serialPort.writeString("a");
-//                        serialPort.writeString("q");
-//                        serialPort.writeString("l");
 						for (String cmd : startMsrCmd) {
 							serialPort.writeString(cmd);
 						}
 					} catch (SerialPortException e1) {
 						e1.printStackTrace();
 					}
-					isStartMeasuring = true;
-					btnRunSM.setText(BTN_LABEL_STOP);
+					isStartMsr = true;
+					btnRunMsr.setText(BTN_LABEL_STOP);
                 /* остановка */
 				} else {
 					try {
-//                        serialPort.writeString("a");
-//                        Thread.sleep(75);
-//                        serialPort.writeString("b");
-//                        Thread.sleep(75);
-//                        serialPort.writeString("k");
 						for (String cmd : stopMsrCmd) {
 							serialPort.writeString(cmd);
 							Thread.sleep(75);
@@ -74,11 +79,12 @@ public class App {
 					} catch (SerialPortException | InterruptedException e1) {
 						e1.printStackTrace();
 					}
-					isStartMeasuring = false;
-					btnRunSM.setText(BTN_LABEL_START);
+					isStartMsr = false;
+					btnRunMsr.setText(BTN_LABEL_START);
 				}
 			}
 		});
+
 		JButton btnClear = new JButton("Clear");
 		btnClear.addActionListener(new AbstractAction() {
 			@Override
@@ -91,12 +97,50 @@ public class App {
 		jtaLogDataADC = new JTextArea();
 		JScrollPane jscp = new JScrollPane();
 		jscp.setViewportView(jtaLogDataADC);
-		jscp.setPreferredSize(new Dimension(Short.MAX_VALUE, Short.MAX_VALUE));
+		jscp.setPreferredSize(new Dimension(Short.MAX_VALUE, 25));
 
-		jp.add(btnRunSM);
+		// Create a chart:
+		Chart2D chart = new Chart2D();
+		// Create an ITrace:
+		// Note that dynamic charts need limited amount of values!!!
+
+		trace.setColor(Color.RED);
+
+		// Add the trace to the chart. This has to be done before adding points (deadlock prevention):
+		chart.addTrace(trace);
+
+		chart.setFont(new Font("Veranda", Font.BOLD, 14));
+
+		chart.setBackground(Color.LIGHT_GRAY);
+		chart.setForeground(Color.BLUE);
+		chart.setGridColor(Color.GREEN);
+
+		IAxis axisX = chart.getAxisX();
+		axisX.setPaintGrid(true);
+		axisX.setAxisTitle(new IAxis.AxisTitle("Длина листа (мм)"));
+
+		IAxis axisY = chart.getAxisY();
+		axisY.setPaintGrid(true);
+//        axisY.setMajorTickSpacing(200.0);
+//        axisY.setPixelYTop(200);
+//        axisY.setRange(new Range(0.0, 200.0));
+		IRangePolicy rangePolicy = new RangePolicyFixedViewport(new Range(0, 255));
+		chart.getAxisY().setRangePolicy(rangePolicy);
+
+		// set a number formatter to get rid of the unnecessary ".0" prefixes for the X-Axis:
+		NumberFormat format = new DecimalFormat("#");
+		// Important!
+		// Or it will allow more than 100 integer digits and rendering will be
+		// confused.
+		// See the comment for java.text.DecimalFormat#applyPattern(String)
+		format.setMaximumIntegerDigits(3);
+		axisY.setFormatter(new LabelFormatterNumber(format));
+
+		jp.add(btnRunMsr);
 		jp.add(btnClear);
-		jp.add(jtfRS232Port);
-		jp.add(jscp);
+//        jp.add(jtfRS232Port);
+//        jp.add(jscp);
+		jp.add(chart);
 
 		JFrame mainFrame = new JFrame();
 		mainFrame.getContentPane().setLayout(new BorderLayout());
@@ -134,13 +178,14 @@ public class App {
 
 	private static final char[] mcuComm = {'o', 'p'};
 	private int successMcuCount = 0;
+	private int xCount = 0;
 
 	private class PortReader implements SerialPortEventListener {
 		@Override
 		public void serialEvent(SerialPortEvent event) {
 			synchronized(event){
 				if(event.isRXCHAR() && event.getEventValue() > 0){
-					if (isStartMeasuring) {
+					if (isStartMsr) {
 						try {
 							receiveDataArr = serialPort.readIntArray();
 							if (receiveDataArr != null) {
@@ -156,6 +201,7 @@ public class App {
 								logData.append(String.valueOf(receiveDataArr[0]));
 								logData.append("\n");
 								jtaLogDataADC.setText(logData.toString());
+								trace.addPoint(xCount++, receiveDataArr[0]);
 							}
 						}
 						catch (SerialPortException ex) {
