@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 31.10.2015 11:46:51
+Cmp-Mod V01 Created by CvPcb (2013-jul-07)-stable date = Чтв 10 Дек 2015 19:34:26
 
 BeginCmp
 TimeStamp = /563486AD;
@@ -17,7 +17,7 @@ EndCmp
 BeginCmp
 TimeStamp = /56345964;
 Reference = C3;
-ValeurCmp = 0.1uF;
+ValeurCmp = 0.01uF;
 IdModule  = c_0805;
 EndCmp
 
@@ -162,6 +162,13 @@ IdModule  = DO-214AC(SMA);
 EndCmp
 
 BeginCmp
+TimeStamp = /5669BBA7;
+Reference = D8;
+ValeurCmp = LED-Y;
+IdModule  = LED-5MM;
+EndCmp
+
+BeginCmp
 TimeStamp = /5634867C;
 Reference = IC1;
 ValeurCmp = ATTINY2313-P;
@@ -269,7 +276,7 @@ EndCmp
 BeginCmp
 TimeStamp = /563455CA;
 Reference = R1;
-ValeurCmp = 5.1k;
+ValeurCmp = 910;
 IdModule  = r_0805;
 EndCmp
 
@@ -395,7 +402,7 @@ EndCmp
 BeginCmp
 TimeStamp = /563455BB;
 Reference = RV2;
-ValeurCmp = 68k;
+ValeurCmp = 33k;
 IdModule  = RV2;
 EndCmp
 
