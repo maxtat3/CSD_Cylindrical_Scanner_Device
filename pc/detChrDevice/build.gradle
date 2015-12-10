@@ -9,6 +9,29 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    archiveName = "DetermChromeDevice.jar"
+    from {
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+        attributes 'Main-Class': 'app.App'
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile 'net.sf.jchart2d:jchart2d:3.3.2'
+    compile 'org.scream3r:jssc:2.8.0'
+}
+
+task(runApp, dependsOn: 'classes', type: JavaExec) {
+    main = 'edu.nuos.detchrdevice.Main'
+    classpath = sourceSets.main.runtimeClasspath
 }
