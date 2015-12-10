@@ -4,7 +4,6 @@ import info.monitorenter.gui.chart.Chart2D;
 import info.monitorenter.gui.chart.IAxis;
 import info.monitorenter.gui.chart.IRangePolicy;
 import info.monitorenter.gui.chart.ITrace2D;
-import info.monitorenter.gui.chart.axis.scalepolicy.AxisScalePolicyManualTicks;
 import info.monitorenter.gui.chart.labelformatters.LabelFormatterNumber;
 import info.monitorenter.gui.chart.rangepolicies.RangePolicyFixedViewport;
 import info.monitorenter.gui.chart.traces.Trace2DLtd;
@@ -17,6 +16,8 @@ import jssc.SerialPortException;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -25,7 +26,12 @@ import java.text.NumberFormat;
  * Главный класс приложения
  */
 public class App {
-	public static final String COM_PORT = "/dev/ttyACM0";
+
+	public static final String[] COM_PORTS = {"COM1", "COM2", "COM3", "COM4",
+			"COM5", "COM6", "COM7", "COM8",
+			"COM9", "COM10", "/dev/ttyACM0", "/dev/ttyACM1",
+			"/dev/ttyACM2", "/dev/ttyACM3", "/dev/ttyACM4", "/dev/ttyUSB0"
+	};
 
 	public static final String BTN_LABEL_START = "start";
 	public static final String BTN_LABEL_STOP = "stop";
@@ -33,7 +39,7 @@ public class App {
 	public static final String [] startMsrCmd = {"a", "q", "l"};
 	public static final String [] stopMsrCmd = {"a", "b", "k"};
 
-	private JTextField jtfRS232Port = new JTextField(COM_PORT);
+	public JComboBox jcmboxComPort = new JComboBox();
 	private JTextArea jtaLogDataADC;
 	private ITrace2D trace = new Trace2DLtd(200);
 
@@ -50,9 +56,11 @@ public class App {
 
 
 	private void uiBuild() {
-		JPanel jp = new JPanel();
-//        jp.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-		jp.setLayout(new BoxLayout(jp, BoxLayout.Y_AXIS));
+		JPanel jpDir = new JPanel();
+		jpDir.setLayout(new BoxLayout(jpDir, BoxLayout.X_AXIS));
+
+		JPanel jpChart = new JPanel();
+		jpChart.setLayout(new BoxLayout(jpChart, BoxLayout.Y_AXIS));
 
 		final JButton btnRunMsr = new JButton(BTN_LABEL_START);
 		btnRunMsr.addActionListener(new AbstractAction() {
@@ -63,8 +71,9 @@ public class App {
 					try {
 						for (String cmd : startMsrCmd) {
 							serialPort.writeString(cmd);
+							Thread.sleep(75);
 						}
-					} catch (SerialPortException e1) {
+					} catch (SerialPortException | InterruptedException e1) {
 						e1.printStackTrace();
 					}
 					isStartMsr = true;
@@ -111,9 +120,9 @@ public class App {
 
 		chart.setFont(new Font("Veranda", Font.BOLD, 14));
 
-		chart.setBackground(Color.LIGHT_GRAY);
-		chart.setForeground(Color.BLUE);
-		chart.setGridColor(Color.GREEN);
+		chart.setBackground(Color.BLACK);
+		chart.setForeground(new Color(62, 95, 230));
+		chart.setGridColor(new Color(87, 87, 87));
 
 		IAxis axisX = chart.getAxisX();
 		axisX.setPaintGrid(true);
@@ -121,9 +130,6 @@ public class App {
 
 		IAxis axisY = chart.getAxisY();
 		axisY.setPaintGrid(true);
-//        axisY.setMajorTickSpacing(200.0);
-//        axisY.setPixelYTop(200);
-//        axisY.setRange(new Range(0.0, 200.0));
 		IRangePolicy rangePolicy = new RangePolicyFixedViewport(new Range(0, 255));
 		chart.getAxisY().setRangePolicy(rangePolicy);
 
@@ -136,24 +142,46 @@ public class App {
 		format.setMaximumIntegerDigits(3);
 		axisY.setFormatter(new LabelFormatterNumber(format));
 
-		jp.add(btnRunMsr);
-		jp.add(btnClear);
-//        jp.add(jtfRS232Port);
-//        jp.add(jscp);
-		jp.add(chart);
+		jcmboxComPort.setModel(new DefaultComboBoxModel(COM_PORTS));
+		jcmboxComPort.setSelectedIndex(10);
+		jcmboxComPort.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+//                uartInit();
+
+				if (serialPort.isOpened()) {
+					try {
+						serialPort.closePort();
+						uartInit();
+					} catch (SerialPortException e1) {
+						e1.printStackTrace();
+					}
+				} else {
+					uartInit();
+				}
+			}
+		});
+
+		jpDir.add(btnRunMsr);
+		jpDir.add(btnClear);
+		jpDir.add(jcmboxComPort);
+		jpChart.add(chart);
 
 		JFrame mainFrame = new JFrame();
 		mainFrame.getContentPane().setLayout(new BorderLayout());
-		mainFrame.add(jp);
+		mainFrame.add(jpDir, BorderLayout.NORTH);
+		mainFrame.add(jpChart, BorderLayout.CENTER);
 		mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		mainFrame.pack();
-		mainFrame.setSize(300, 400);
+		mainFrame.setSize(800, 600);
 		mainFrame.setVisible(true);
 	}
 
 	public void uartInit(){
 		//Передаём в конструктор имя порта
-		serialPort = new SerialPort(jtfRS232Port.getText());
+		String portName = jcmboxComPort.getSelectedItem().toString();
+		System.out.println("portName = " + portName);
+		serialPort = new SerialPort(portName);
 		try {
 			//Открываем порт
 			serialPort.openPort();
@@ -169,6 +197,7 @@ public class App {
 			serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
 			//Отправляем запрос устройству
 //            serialPort.writeString("a");
+			System.out.println("port open.");
 		}
 		catch (SerialPortException ex) {
 			System.out.println(ex);
@@ -178,7 +207,8 @@ public class App {
 
 	private static final char[] mcuComm = {'o', 'p'};
 	private int successMcuCount = 0;
-	private int xCount = 0;
+	private double xCount = 0.0;
+	public static final double deltaX = 0.01;
 
 	private class PortReader implements SerialPortEventListener {
 		@Override
@@ -201,7 +231,7 @@ public class App {
 								logData.append(String.valueOf(receiveDataArr[0]));
 								logData.append("\n");
 								jtaLogDataADC.setText(logData.toString());
-								trace.addPoint(xCount++, receiveDataArr[0]);
+								trace.addPoint(xCount += deltaX, receiveDataArr[0]);
 							}
 						}
 						catch (SerialPortException ex) {
