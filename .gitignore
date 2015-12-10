@@ -10,7 +10,6 @@
 *.pch
 
 # Libraries
-*.lib
 *.a
 *.la
 *.lo
@@ -89,3 +88,13 @@ crashlytics-build.properties
 
 # Package Files #
 *.jar
+
+### Circuit ###
+# backup files
+*.bak
+
+# postscript vector image files
+*.ps
+
+# pcb module archives and other zip archives
+.zip
