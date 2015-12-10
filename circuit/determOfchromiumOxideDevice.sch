@@ -1383,7 +1383,7 @@ Connection ~ 3500 1400
 Text Notes 2300 2100 0    39   ~ 0
 Kу подстр = 1+(22/0,910)=25,17
 Text Notes 2300 2200 0    39   ~ 0
-Uin = 100mV; Uout = 100mV*25~2.56V
+Uin = 100mV; Uout = 100mV*25=2.56V
 Text Notes 1750 4350 0    39   ~ 0
 Zener diode do not used !!! \nInsted of them tn2313 connected to supply +3.3V .
 NoConn ~ 3725 6775
