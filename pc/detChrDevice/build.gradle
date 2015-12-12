@@ -20,7 +20,7 @@ jar {
         }
     }
     manifest {
-        attributes 'Main-Class': 'edu.nuos.detchrdevice.Main'
+        attributes 'Main-Class': 'edu.nuos.detchrdevice.app.App'
     }
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
 }
@@ -32,6 +32,6 @@ dependencies {
 }
 
 task(runApp, dependsOn: 'classes', type: JavaExec) {
-    main = 'edu.nuos.detchrdevice.Main'
+    main = 'edu.nuos.detchrdevice.app.App'
     classpath = sourceSets.main.runtimeClasspath
 }
