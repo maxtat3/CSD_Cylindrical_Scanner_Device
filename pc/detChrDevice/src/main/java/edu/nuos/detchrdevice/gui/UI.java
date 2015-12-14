@@ -21,9 +21,7 @@ import java.text.NumberFormat;
 public class UI {
 
 	private JButton btnRunMsr = null;
-	private JButton btnClear;
 	private JComboBox jcmboxComPort;
-	private JTextArea jtaLogDataADC;
 	private ITrace2D trace;
 	private JFrame mainFrame;
 
@@ -45,16 +43,9 @@ public class UI {
 		jpChart.setLayout(new BoxLayout(jpChart, BoxLayout.Y_AXIS));
 
 		btnRunMsr = new JButton(Const.BTN_LABEL_START);
-		btnClear = new JButton("Clear");
 
 		jcmboxComPort = new JComboBox();
 		jcmboxComPort.setModel(new DefaultComboBoxModel(Const.COM_PORTS));
-
-		jtaLogDataADC = new JTextArea();
-
-		JScrollPane jscp = new JScrollPane();
-		jscp.setViewportView(jtaLogDataADC);
-		jscp.setPreferredSize(new Dimension(Short.MAX_VALUE, 25));
 
 		// Create a chart:
 		Chart2D chart = new Chart2D();
@@ -95,7 +86,6 @@ public class UI {
 		JPanel jpDir = new JPanel();
 		jpDir.setLayout(new BoxLayout(jpDir, BoxLayout.X_AXIS));
 		jpDir.add(btnRunMsr);
-		jpDir.add(btnClear);
 		jpDir.add(jcmboxComPort);
 		jpChart.add(chart);
 
@@ -114,16 +104,8 @@ public class UI {
 		return btnRunMsr;
 	}
 
-	public JButton getBtnClear() {
-		return btnClear;
-	}
-
 	public JComboBox getJcmboxComPort() {
 		return jcmboxComPort;
-	}
-
-	public JTextArea getJtaLogDataADC() {
-		return jtaLogDataADC;
 	}
 
 	public ITrace2D getTrace() {

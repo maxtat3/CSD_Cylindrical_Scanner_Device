@@ -49,14 +49,6 @@ public class UIEntry implements UART.CallbackADCData{
 			}
 		});
 
-		ui.getBtnClear().addActionListener(new AbstractAction() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				ui.getJtaLogDataADC().setText("");
-				adcDataBuffer.setLength(0);
-			}
-		});
-
 		ui.getJcmboxComPort().setSelectedIndex(10);
 		ui.getJcmboxComPort().addItemListener(new ItemListener() {
 			@Override
