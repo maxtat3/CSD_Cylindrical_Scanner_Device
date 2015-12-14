@@ -47,6 +47,16 @@
 #define 	STATE_LED 		1
 
 // ==========================================
+//			Вывод генерации меандра
+// ==========================================
+/* определения регистров */
+#define		MEANDER_PORT		PORTB
+#define		MEANDER_DDR			DDRB
+
+/* определения номера порта на который выводиться меандр */
+#define 	MEANDER 			2
+
+// ==========================================
 // 			Настройки ТС1, отвечающего за
 //			вращение ШД
 // ==========================================
@@ -111,6 +121,7 @@ void initIO(void);
 void initUSART(void);
 void initADC(void);
 void initExtInt0(void);
+void initTC2(void);
 void turnOnTC1(void);
 void turnOffTC1(void);
 void sendCharToUSART(unsigned char sym);
@@ -128,6 +139,7 @@ int main(void){
 	initUSART();
 	initADC();
 	initExtInt0();
+	initTC2();
 	sei();
 
 	checkSMInBeginPos();
@@ -212,7 +224,24 @@ ISR(INT0_vect){
 	_delay_ms(200); // антидребизг
 }
 
-
+const unsigned char kSecFactor = 10;
+volatile unsigned char kSecCount = 0;
+volatile bool isSwithOnMeandr = false;
+ISR(TIMER2_COMP_vect){
+	if (kSecCount == kSecFactor - 1){
+		kSecCount = 0;
+		if (!isSwithOnMeandr){
+			SetBit(MEANDER_PORT, MEANDER);
+			isSwithOnMeandr = true;
+		} else {
+			ClearBit(MEANDER_PORT, MEANDER);
+			isSwithOnMeandr = false;
+		}
+	} else {
+		kSecCount ++;
+	}
+	
+}
 
 ISR(TIMER1_OVF_vect){
 	// в каком направлении выполняеться движение ШД
@@ -282,6 +311,9 @@ void initIO(void){
 	
 	/* Настриваем на ВЫХОД порт для подключения state led  */
 	SetBit(STATE_LED_DDR, STATE_LED);
+
+	/* Настриваем на ВЫХОД порт для меандра  */
+	SetBit(MEANDER_DDR, MEANDER); 
 }
 
 void initUSART(){
@@ -313,6 +345,16 @@ void initExtInt0(){
 	ClearBit(MCUCR, ISC01);
 	// резрещаем внешние прерывания
 	SetBit(GICR, INT0);
+}
+
+// настройка ТС2 - генерации меандра 
+void initTC2(){
+	SetBit(TIMSK, OCIE2);
+	SetBit(TCCR2, WGM21);
+	SetBit(TCCR2, CS20);
+	SetBit(TCCR2, CS21);
+	SetBit(TCCR2, CS22);
+	OCR2 = 195;
 }
 
 
