@@ -2,6 +2,7 @@ package edu.nuos.detchrdevice.gui;
 
 import edu.nuos.detchrdevice.app.Const;
 import edu.nuos.detchrdevice.conn.UART;
+import edu.nuos.detchrdevice.utils.FileUtils;
 import jssc.SerialPortException;
 
 import javax.swing.*;
@@ -90,6 +91,7 @@ public class UIEntry implements UART.CallbackADCData{
 					uart.getSerialPort().writeString(cmd);
 					Thread.sleep(75);
 				}
+				FileUtils.writeToCSV(adcDataBuffer);
 			} catch (SerialPortException | InterruptedException e1) {
 				e1.printStackTrace();
 			}
