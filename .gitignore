@@ -103,3 +103,6 @@ crashlytics-build.properties
 ### Information ###
 .~lock.help.odt#
 info/*.pdf
+
+### Generated data files ###
+*.csv
