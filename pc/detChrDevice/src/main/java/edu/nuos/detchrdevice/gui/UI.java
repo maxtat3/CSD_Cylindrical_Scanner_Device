@@ -16,7 +16,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 /**
- * Created by max on 12.12.15.
+ * Компоновка UI
  */
 public class UI {
 
@@ -24,7 +24,7 @@ public class UI {
 	private JButton btnClear;
 	private JComboBox jcmboxComPort;
 	private JTextArea jtaLogDataADC;
-	private ITrace2D trace = new Trace2DLtd(200);
+	private ITrace2D trace;
 	private JFrame mainFrame;
 
 
@@ -61,6 +61,7 @@ public class UI {
 		// Create an ITrace:
 		// Note that dynamic charts need limited amount of values!!!
 
+		trace = new Trace2DLtd(500);
 		trace.setColor(Color.RED);
 
 		// Add the trace to the chart. This has to be done before adding points (deadlock prevention):

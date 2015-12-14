@@ -10,29 +10,38 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 /**
- * Created by max on 12.12.15.
+ * Управление и обработка действий UI
  */
 public class UIEntry implements UART.CallbackADCData{
 
 	private static UI ui;
 	private UART uart;
-
+	/**
+	 * Хранение состояния нажатия на кнопку для запуска или остановки измерений
+	 */
+	private boolean isStartMsr = false;
 
 
 	public UIEntry() {
 		uiInit();
 		uart = new UART(this);
+		// при запуске, приложение автоматчески пытается подключиться по порту, установленному по умолчанию
 		uart.uartInit(ui.getJcmboxComPort().getSelectedItem().toString());
 	}
 
-
+	/**
+	 * Создание UI
+	 */
 	private void uiInit() {
 		ui = UI.getInstance();
 		ui.buildUI();
-		setActions();
+		setUIActions();
 	}
 
-	private void setActions() {
+	/**
+	 * Установка действий к компонентам UI
+	 */
+	private void setUIActions() {
 		ui.getBtnRunMsr().addActionListener(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -44,7 +53,7 @@ public class UIEntry implements UART.CallbackADCData{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				ui.getJtaLogDataADC().setText("");
-				logData.setLength(0);
+				adcDataBuffer.setLength(0);
 			}
 		});
 
@@ -52,7 +61,6 @@ public class UIEntry implements UART.CallbackADCData{
 		ui.getJcmboxComPort().addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-//                uartInit();
 				if (uart.getSerialPort().isOpened()) {
 					try {
 						uart.getSerialPort().closePort();
@@ -68,15 +76,10 @@ public class UIEntry implements UART.CallbackADCData{
 	}
 
 	/**
-	 * Хранение состояния нажатия на кнопку для запуска или остановки измерений
-	 */
-	private boolean isStartMsr = false;
-
-	/**
 	 * Выполнение запуска или остановки измерений
 	 */
 	private void startStopMeasurement() {
-		/* запуск */
+		// запуск
 		if (ui.getBtnRunMsr().getText().equals(Const.BTN_LABEL_START)) {
 			try {
 				for (String cmd : Const.startMsrCmd) {
@@ -88,7 +91,7 @@ public class UIEntry implements UART.CallbackADCData{
 			}
 			isStartMsr = true;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_STOP);
-		/* остановка */
+		// остановка
 		} else {
 			try {
 				for (String cmd : Const.stopMsrCmd) {
@@ -105,14 +108,14 @@ public class UIEntry implements UART.CallbackADCData{
 
 	private double xCount = 0.0;
 	public static final double deltaX = 0.01;
-	private StringBuilder logData = new StringBuilder();
+	private StringBuilder adcDataBuffer = new StringBuilder();
 
 	@Override
 	public void addAdcVal(int val) {
 		ui.getTrace().addPoint(xCount += deltaX, val);
 
-		logData.append(String.valueOf(val));
-		logData.append("\n");
+		adcDataBuffer.append(String.valueOf(val));
+		adcDataBuffer.append("\n");
 	}
 
 

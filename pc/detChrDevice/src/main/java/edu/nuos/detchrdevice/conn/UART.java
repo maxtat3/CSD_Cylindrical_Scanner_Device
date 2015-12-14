@@ -10,7 +10,7 @@ import jssc.SerialPortException;
 import javax.swing.*;
 
 /**
- * Created by max on 12.12.15.
+ * Управление с com портом
  */
 public class UART {
 
