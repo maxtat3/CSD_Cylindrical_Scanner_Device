@@ -18,7 +18,6 @@ public class UART {
 
 	private SerialPort serialPort;
 
-	private int successMcuCount = 0;
 
 	private UIEntry uiEntry;
 
@@ -67,13 +66,6 @@ public class UART {
 						try {
 							receiveDataArr = serialPort.readIntArray();
 							if (receiveDataArr != null) {
-								if (receiveDataArr[0] == Const.mcuComm[successMcuCount]) {
-									successMcuCount++;
-								}
-								if (successMcuCount == 2) {
-									successMcuCount = 0;
-									System.out.println("command ok !");
-								}
 								callbackADCData.addAdcVal(receiveDataArr[0]);
 							}
 						}

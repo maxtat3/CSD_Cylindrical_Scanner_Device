@@ -178,8 +178,6 @@ int main(void){
 
 			case DO_START_SM:
 				if (isBlockTC1 == false){
-					sendCharToUSART('o');
-					sendCharToUSART('p');
 					cli();
 					turnOnTC1();
 					sei();
