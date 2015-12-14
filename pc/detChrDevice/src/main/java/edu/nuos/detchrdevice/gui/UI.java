@@ -52,7 +52,7 @@ public class UI {
 		// Create an ITrace:
 		// Note that dynamic charts need limited amount of values!!!
 
-		trace = new Trace2DLtd(500);
+		trace = new Trace2DLtd(Const.MAX_AMOUNT_POINTS_ON_CHART);
 		trace.setColor(Color.RED);
 
 		// Add the trace to the chart. This has to be done before adding points (deadlock prevention):
