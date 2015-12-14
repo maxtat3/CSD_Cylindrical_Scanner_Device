@@ -106,6 +106,7 @@ const char smTableNormalStep[] = {_BV(SM_WIRE_4), _BV(SM_WIRE_3), _BV(SM_WIRE_2)
 //======================================
 char pcToMcuStartMeasureComm[] = {'a', 'q', 'l'};
 char pcToMcuStopMeasureComm[] = {'a', 'b', 'k'};
+char pcToMcuInitDevice[] = {'a', 'g', 'd'};
 int commCount = 0; //общий счетчик для определения совпадения команды посимвольно 
 /* Перечислегние команд от ПК */
 enum fromPcCommands{
@@ -154,6 +155,15 @@ int main(void){
 		//=====================================
 		//	Блоки проверки соответствия команд от ПК
 		//=====================================
+		if (sym == pcToMcuInitDevice[commCount]){
+			commCount ++;
+			if (commCount == sizeof(pcToMcuInitDevice)){
+				sendCharToUSART('g');
+				sendCharToUSART('h');
+				sendCharToUSART('y');
+				commCount = 0;
+			}
+		} else 
 		if (sym == pcToMcuStartMeasureComm[commCount]){
 			commCount ++;
 			if (commCount == sizeof(pcToMcuStartMeasureComm)){

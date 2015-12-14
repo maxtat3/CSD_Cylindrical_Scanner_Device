@@ -37,6 +37,6 @@ public class Const {
 	 */
 	public static final String [] stopMsrCmd = {"a", "b", "k"};
 
-	public static final char[] mcuComm = {'o', 'p'};
-
+	public static final String[] REQUEST_INIT_DEVICE = {"a", "g", "d"};
+	public static final char[] RESPONSE_INIT_DEVICE = {'g', 'h', 'y'};
 }

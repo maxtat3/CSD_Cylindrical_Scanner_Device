@@ -10,7 +10,7 @@ import jssc.SerialPortException;
 import javax.swing.*;
 
 /**
- * Управление с com портом
+ * Управление com портом
  */
 public class UART {
 
@@ -21,7 +21,11 @@ public class UART {
 
 	private UIEntry uiEntry;
 
-	private int[] receiveDataArr;
+	private int[] rxDataBuff;
+
+	private boolean isDeviceFound = false;
+
+	private int responseCount = 0;
 
 
 
@@ -57,24 +61,79 @@ public class UART {
 		}
 	}
 
+	/**
+	 * Попытка связи с устройством
+	 * @return
+	 */
+	public boolean searchDevice() {
+		tryInitDeviceRequest();
+		return isDeviceFound;
+	}
+
 	private class PortReader implements SerialPortEventListener {
 		@Override
 		public void serialEvent(SerialPortEvent event) {
 			synchronized(event){
 				if(event.isRXCHAR() && event.getEventValue() > 0){
-					if (uiEntry.isStartMsr()) {
-						try {
-							receiveDataArr = serialPort.readIntArray();
-							if (receiveDataArr != null) {
-								callbackADCData.addAdcVal(receiveDataArr[0]);
-							}
-						}
-						catch (SerialPortException ex) {
-							System.out.println(ex);
-							System.out.println("error - public void serialEvent(SerialPortEvent event)");
-						}
+					if (isDeviceFound) {
+						readMsrResult();
+					} else {
+						tryInitDeviceResponse();
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Выполнение попытки нахождения устройства.
+	 * Запрос к устройству.
+	 */
+	private void tryInitDeviceRequest() {
+		try {
+			for (String rq : Const.REQUEST_INIT_DEVICE) {
+				serialPort.writeString(rq);
+				Thread.sleep(75);
+			}
+		} catch (SerialPortException | InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Выполнение попытки нахождения устройства.
+	 * Проверка ответа от устройства.
+	 */
+	private void tryInitDeviceResponse() {
+		try {
+			rxDataBuff = serialPort.readIntArray();
+		} catch (SerialPortException e) {
+			e.printStackTrace();
+		}
+		if (rxDataBuff[0] == Const.RESPONSE_INIT_DEVICE[responseCount]) {
+			responseCount++;
+		}
+		if (responseCount == Const.RESPONSE_INIT_DEVICE.length) {
+			isDeviceFound = true;
+			responseCount = 0;
+		}
+	}
+
+	/**
+	 * Чтение результата измерения.
+	 * Выполняеться чтение атомарного ацп преобразования.
+	 */
+	private void readMsrResult() {
+		if (uiEntry.isStartMsr()) {
+			try {
+				rxDataBuff = serialPort.readIntArray();
+				if (rxDataBuff != null) {
+					callbackADCData.addAdcVal(rxDataBuff[0]);
+				}
+			}
+			catch (SerialPortException ex) {
+				System.out.println(ex);
+				System.out.println("error - public void serialEvent(SerialPortEvent event)");
 			}
 		}
 	}
@@ -88,5 +147,9 @@ public class UART {
 
 	public SerialPort getSerialPort() {
 		return serialPort;
+	}
+
+	public boolean isDeviceFound() {
+		return isDeviceFound;
 	}
 }

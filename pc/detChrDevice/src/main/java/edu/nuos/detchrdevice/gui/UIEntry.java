@@ -3,6 +3,7 @@ package edu.nuos.detchrdevice.gui;
 import edu.nuos.detchrdevice.app.Const;
 import edu.nuos.detchrdevice.conn.UART;
 import edu.nuos.detchrdevice.utils.FileUtils;
+import edu.nuos.detchrdevice.utils.SystemSpecified;
 import jssc.SerialPortException;
 
 import javax.swing.*;
@@ -28,6 +29,7 @@ public class UIEntry implements UART.CallbackADCData{
 		uart = new UART(this);
 		// при запуске, приложение автоматчески пытается подключиться по порту, установленному по умолчанию
 		uart.uartInit(ui.getJcmboxComPort().getSelectedItem().toString());
+		uart.searchDevice();
 	}
 
 	/**
@@ -46,11 +48,12 @@ public class UIEntry implements UART.CallbackADCData{
 		ui.getBtnRunMsr().addActionListener(new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("device = " + uart.isDeviceFound());
 				startStopMeasurement();
 			}
 		});
 
-		ui.getJcmboxComPort().setSelectedIndex(10);
+		ui.getJcmboxComPort().setSelectedIndex(11);
 		ui.getJcmboxComPort().addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
