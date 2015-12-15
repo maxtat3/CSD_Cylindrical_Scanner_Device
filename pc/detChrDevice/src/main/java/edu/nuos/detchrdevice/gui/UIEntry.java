@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -117,6 +118,10 @@ public class UIEntry implements UART.CallbackADCData{
 	private void startStopMeasurement() {
 		// запуск
 		if (ui.getBtnRunMsr().getText().equals(Const.BTN_LABEL_START)) {
+			if (ui.getTrace().getSize() != 0) {
+				ui.getTrace().removeAllPoints();
+				xCount = 0.0;
+			}
 			try {
 				for (String cmd : Const.startMsrCmd) {
 					uart.getSerialPort().writeString(cmd);
@@ -127,7 +132,7 @@ public class UIEntry implements UART.CallbackADCData{
 			}
 			isStartMsr = true;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_STOP);
-		// остановка
+			// остановка
 		} else {
 			try {
 				for (String cmd : Const.stopMsrCmd) {
