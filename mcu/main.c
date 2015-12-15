@@ -158,9 +158,12 @@ int main(void){
 		if (sym == pcToMcuInitDevice[commCount]){
 			commCount ++;
 			if (commCount == sizeof(pcToMcuInitDevice)){
-				sendCharToUSART('g');
-				sendCharToUSART('h');
-				sendCharToUSART('y');
+				sendCharToUSART('g'); //ascii = 103
+				_delay_ms(15);
+				sendCharToUSART('h'); //ascii = 104
+				_delay_ms(15);
+				sendCharToUSART('y'); //ascii = 121
+				_delay_ms(15);
 				commCount = 0;
 			}
 		} else 

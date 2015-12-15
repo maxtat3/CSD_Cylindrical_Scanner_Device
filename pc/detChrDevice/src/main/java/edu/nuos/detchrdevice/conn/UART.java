@@ -34,14 +34,16 @@ public class UART {
 		callbackADCData = uiEntry;
 	}
 
-
-	public void uartInit(String portName){
+	/**
+	 * Инициализация com порта.
+	 * @param portName имя com порта (например com1, ttyACM0)
+	 * @return true - порт открыт
+	 */
+	public boolean uartInit(String portName){
 		System.out.println("portName = " + portName);
 		serialPort = new SerialPort(portName);
 		try {
-			//Открываем порт
 			serialPort.openPort();
-			//Выставляем параметры
 			serialPort.setParams(SerialPort.BAUDRATE_9600,
 					SerialPort.DATABITS_8,
 					SerialPort.STOPBITS_1,
@@ -49,23 +51,23 @@ public class UART {
 			//Включаем аппаратное управление потоком (для FT232 нжуно отключать)
 //            serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN |
 //                                          SerialPort.FLOWCONTROL_RTSCTS_OUT);
-			//Устанавливаем ивент лисенер и маску
 			serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
-			//Отправляем запрос устройству
-//            serialPort.writeString("a");
 			System.out.println("port open.");
+			return true;
 		}
 		catch (SerialPortException ex) {
-			System.out.println(ex);
-			JOptionPane.showMessageDialog(null, "Port is close !", "Warning", JOptionPane.WARNING_MESSAGE);
+//			System.out.println(ex);
+//			JOptionPane.showMessageDialog(null, "Port is close !", "Warning", JOptionPane.WARNING_MESSAGE);
+			System.out.println("port " + portName + " close");
 		}
+		return false;
 	}
 
 	/**
-	 * Попытка связи с устройством
-	 * @return
+	 * Попытка связи с устройством на заданном com порту.
+	 * @return true - устройство опознано
 	 */
-	public boolean searchDevice() {
+	public boolean identDevice() {
 		tryInitDeviceRequest();
 		return isDeviceFound;
 	}

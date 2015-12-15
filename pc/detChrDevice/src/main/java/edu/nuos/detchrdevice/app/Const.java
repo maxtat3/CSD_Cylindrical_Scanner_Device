@@ -9,10 +9,10 @@ public class Const {
 	 * Имена com портов, по одному из которых можно выполнить подключение к установке
 	 */
 	public static final String[] COM_PORTS = {
-			"COM1", "COM2", "COM3", "COM4", "COM5",
+			"COM1", "COM2", "COM3", "COM114", "COM5",
 			"COM6", "COM7", "COM8", "COM9", "COM10",
-			"/dev/ttyACM0", "/dev/ttyACM1", "/dev/ttyACM2", "/dev/ttyACM3",
-			"/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3"
+			"/dev/ttyACM1", "/dev/ttyACM2", "/dev/ttyACM3", "/dev/ttyACM0",
+			"/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3", "COM4"
 	};
 
 	/**
