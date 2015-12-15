@@ -113,38 +113,44 @@ public class UIEntry implements UART.CallbackADCData{
 	}
 
 	/**
-	 * Выполнение запуска или остановки измерений
+	 * Выполнение запуска или остановки измерений.
 	 */
 	private void startStopMeasurement() {
 		// запуск
 		if (ui.getBtnRunMsr().getText().equals(Const.BTN_LABEL_START)) {
-			if (ui.getTrace().getSize() != 0) {
-				ui.getTrace().removeAllPoints();
-				xCount = 0.0;
-			}
-			try {
-				for (String cmd : Const.startMsrCmd) {
-					uart.getSerialPort().writeString(cmd);
-					Thread.sleep(75);
-				}
-			} catch (SerialPortException | InterruptedException e1) {
-				e1.printStackTrace();
-			}
+			resetPreviousMsr();
+			execCmd(Const.startMsrCmd);
 			isStartMsr = true;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_STOP);
-			// остановка
+
+		// остановка
 		} else {
-			try {
-				for (String cmd : Const.stopMsrCmd) {
-					uart.getSerialPort().writeString(cmd);
-					Thread.sleep(75);
-				}
-				FileUtils.writeToCSV(adcDataBuffer);
-			} catch (SerialPortException | InterruptedException e1) {
-				e1.printStackTrace();
-			}
+			execCmd(Const.stopMsrCmd);
 			isStartMsr = false;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_START);
+		}
+	}
+
+	/**
+	 * Запрос устройству на выполнение команды.
+	 * @param cmdWord команда
+	 */
+	private void execCmd(String[] cmdWord) {
+		try {
+			for (String cmd : cmdWord) {
+				uart.getSerialPort().writeString(cmd);
+				Thread.sleep(75);
+			}
+		} catch (SerialPortException | InterruptedException e1) {
+			e1.printStackTrace();
+		}
+	}
+
+	private void resetPreviousMsr() {
+		if (ui.getTrace().getSize() != 0) {
+			ui.getTrace().removeAllPoints();
+			adcDataBuffer.setLength(0);
+			xCount = 0.0;
 		}
 	}
 
