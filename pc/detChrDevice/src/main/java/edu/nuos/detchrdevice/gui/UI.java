@@ -99,6 +99,14 @@ public class UI {
 		axisY.setFormatter(new LabelFormatterNumber(format));
 	}
 
+	public void deviceNotFoundMsg() {
+		JOptionPane.showMessageDialog(null, "Устройство не обнаружено. Попробуйте указать COM порт выручную.", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+	}
+
+	public void portClosedMsg(String port) {
+		JOptionPane.showMessageDialog(null, "Порт " + port + " закрыт !", "Предупреждение", JOptionPane.WARNING_MESSAGE);
+	}
+
 	public JButton getBtnRunMsr() {
 		return btnRunMsr;
 	}

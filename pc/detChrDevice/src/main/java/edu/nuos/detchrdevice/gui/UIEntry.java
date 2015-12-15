@@ -30,7 +30,9 @@ public class UIEntry implements UART.CallbackADCData{
 		uart = new UART(this);
 		// при запуске, приложение автоматчески пытается подключиться по порту, установленному по умолчанию
 
-		deviceComPortAutoConnect();
+		if (deviceComPortAutoConnect() == null) {
+			ui.deviceNotFoundMsg();
+		}
 	}
 
 
@@ -88,15 +90,22 @@ public class UIEntry implements UART.CallbackADCData{
 		ui.getJcmboxComPort().addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
+				String portName = ui.getJcmboxComPort().getSelectedItem().toString();
 				if (uart.getSerialPort().isOpened()) {
 					try {
 						uart.getSerialPort().closePort();
-						uart.uartInit(ui.getJcmboxComPort().getSelectedItem().toString());
+						if (!uart.uartInit(portName)) {
+							ui.portClosedMsg(portName);
+						} else {
+							uart.identDevice();
+						}
 					} catch (SerialPortException e1) {
 						e1.printStackTrace();
 					}
 				} else {
-					uart.uartInit(ui.getJcmboxComPort().getSelectedItem().toString());
+					if (!uart.uartInit(portName) ) {
+						ui.portClosedMsg(portName);
+					}
 				}
 			}
 		});
