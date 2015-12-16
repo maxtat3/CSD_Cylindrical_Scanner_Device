@@ -9,7 +9,6 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -151,20 +150,60 @@ public class UIEntry implements UART.CallbackADCData{
 		if (ui.getTrace().getSize() != 0) {
 			ui.getTrace().removeAllPoints();
 			adcDataBuffer.setLength(0);
-			xCount = 0.0;
+			sampleLenCount = 0.0;
 		}
 	}
 
-	private double xCount = 0.0;
-	public static final double deltaX = 0.01;
+
+	/**
+	 * Нумерация количества точек на графиике.
+	 */
+	private int adcNumberCount = 1;
+
+	/**
+	 * Счетчик зачений длины образца каждому интервалу
+	 * которого соответствует значения напряжения ацп
+	 */
+
+	private double sampleLenCount = 0.0;
+
+	/**
+	 * Дискретность длины в мм .
+	 */
+	private static final double SAMPLE_LEN_DELTA = 0.2;
+
+	/**
+	 * Буфер сохраняемых данных для последующей записи в файл.
+	 */
 	private StringBuilder adcDataBuffer = new StringBuilder();
 
 	@Override
 	public void addAdcVal(int val) {
-		ui.getTrace().addPoint(xCount += deltaX, val);
+		ui.getTrace().addPoint(sampleLenCount, val);
 
+		adcDataBuffer.append(adcNumberCount++);
+		adcDataBuffer.append("\t");
+		adcDataBuffer.append(sampleLenCount);
+		adcDataBuffer.append("\t");
 		adcDataBuffer.append(String.valueOf(val));
 		adcDataBuffer.append("\n");
+
+		sampleLenCount = roundDouble(sampleLenCount + SAMPLE_LEN_DELTA);
+	}
+
+	/**
+	 * Округление дробного числа с ошибкой машинного округления.
+	 * @param dig дробное число
+	 * @return округленное дробное число
+	 */
+	private double roundDouble(double dig) {
+		int iVal = (int) ( dig * 1000 );
+		double dVal = dig * 1000;
+		if ( dVal - iVal >= 0.5 ) {
+			iVal += 1;
+		}
+		dVal = (double) iVal;
+		return dVal/1000;
 	}
 
 
