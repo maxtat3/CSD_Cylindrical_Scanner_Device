@@ -2,7 +2,7 @@ package edu.nuos.detchrdevice.gui;
 
 import edu.nuos.detchrdevice.app.Const;
 import edu.nuos.detchrdevice.conn.UART;
-import edu.nuos.detchrdevice.utils.FileUtils;
+import edu.nuos.detchrdevice.utils.Recorder;
 import jssc.SerialPortException;
 
 import javax.swing.*;
@@ -27,11 +27,6 @@ public class UIEntry implements UART.CallbackADCData{
 	private boolean isStartMsrFlag = false;
 
 	/**
-	 * Нумерация количества точек на графиике.
-	 */
-	private int adcNumberCount = 1;
-
-	/**
 	 * Счетчик зачений длины образца каждому интервалу
 	 * которого соответствует значения напряжения ацп.
 	 */
@@ -44,9 +39,9 @@ public class UIEntry implements UART.CallbackADCData{
 	private static final double SAMPLE_LEN_DELTA = 0.2;
 
 	/**
-	 * Буфер сохраняемых данных для последующей записи в файл.
+	 * Экземпляр класса для записи данных в csv файл .
 	 */
-	private StringBuilder adcDataBuffer = new StringBuilder();
+	private Recorder recorder = new Recorder("point number", "Длина образца. мм", "Значение напряжения, В", 300);
 
 
 	public UIEntry() {
@@ -122,7 +117,7 @@ public class UIEntry implements UART.CallbackADCData{
 		// остановка
 		} else {
 			execCmd(Const.CMD_STOP_MSR);
-			FileUtils.writeToCSV(adcDataBuffer);
+			recorder.save();
 			isStartMsrFlag = false;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_START);
 		}
@@ -144,32 +139,20 @@ public class UIEntry implements UART.CallbackADCData{
 	}
 
 	/**
-	 * Сброс предыдущего измерения
+	 * Сброс данных предыдущего измерения из графика
 	 */
 	private void resetPreviousMsr() {
 		if (ui.getTrace().getSize() != 0) {
 			ui.getTrace().removeAllPoints();
 			sampleLenCount = 0.0;
 		}
-		if (adcDataBuffer.length() != 0) {
-			adcDataBuffer.setLength(0);
-			adcNumberCount = 1;
-		}
 	}
 
 	@Override
 	public void addAdcVal(int val) {
 		ui.getTrace().addPoint(sampleLenCount, val);
-
-		adcDataBuffer.append(adcNumberCount);
-		adcDataBuffer.append("\t");
-		adcDataBuffer.append(sampleLenCount);
-		adcDataBuffer.append("\t");
-		adcDataBuffer.append(String.valueOf(val));
-		adcDataBuffer.append("\n");
-
 		sampleLenCount = roundDouble(sampleLenCount + SAMPLE_LEN_DELTA);
-		adcNumberCount ++;
+		recorder.add(sampleLenCount, val);
 	}
 
 	/**
