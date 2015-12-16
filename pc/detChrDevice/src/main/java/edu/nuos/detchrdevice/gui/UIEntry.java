@@ -19,19 +19,45 @@ public class UIEntry implements UART.CallbackADCData{
 	private static final Logger log = Logger.getLogger(UIEntry.class.getSimpleName());
 	private static UI ui;
 	private UART uart;
+
 	/**
 	 * Флаг состояния нажатия на кнопку для запуска или остановки измерений.
 	 * true - измерение запущено и выполняеться
 	 */
 	private boolean isStartMsrFlag = false;
 
+	/**
+	 * Нумерация количества точек на графиике.
+	 */
+	private int adcNumberCount = 1;
+
+	/**
+	 * Счетчик зачений длины образца каждому интервалу
+	 * которого соответствует значения напряжения ацп.
+	 */
+
+	private double sampleLenCount = 0.0;
+
+	/**
+	 * Дискретность длины в мм .
+	 */
+	private static final double SAMPLE_LEN_DELTA = 0.2;
+
+	/**
+	 * Буфер сохраняемых данных для последующей записи в файл.
+	 */
+	private StringBuilder adcDataBuffer = new StringBuilder();
+
 
 	public UIEntry() {
 		uiInit();
 		uart = new UART(this);
-		// при запуске, приложение автоматчески пытается подключиться по порту, установленному по умолчанию
 
-		if (deviceComPortAutoConnect() == null) {
+		// при запуске приложение автоматчески пытается найти порт устройства и подключиться к нему.
+		String port = uart.deviceComPortAutoConnect();
+		if (port != null) {
+			ui.getJcmboxComPort().setSelectedItem(port);
+		} else {
 			ui.deviceNotFoundMsg();
 		}
 	}
@@ -44,36 +70,6 @@ public class UIEntry implements UART.CallbackADCData{
 		ui = UI.getInstance();
 		ui.buildUI();
 		setUIActions();
-	}
-
-	/**
-	 * Автоподключение к ком порту устройства.
-	 * Выполняеться полный перебор всех портов в ОС. Далее каждый открытый порт
-	 * проверяеться на пренадлежность к устройству, т.к. к ОС может быть подключено
-	 * несколько устройств.
-	 */
-	private String deviceComPortAutoConnect() {
-		for (String port : Const.COM_PORTS) {
-			boolean isPortOpen = uart.uartInit(port);
-			if (isPortOpen) {
-				uart.identDevice();
-				try {
-					Thread.sleep(300);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				if (uart.isDeviceFound()) {
-					ui.getJcmboxComPort().setSelectedItem(port);
-					return port;
-				}
-			}
-			try {
-				Thread.sleep(75);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -153,39 +149,19 @@ public class UIEntry implements UART.CallbackADCData{
 	private void resetPreviousMsr() {
 		if (ui.getTrace().getSize() != 0) {
 			ui.getTrace().removeAllPoints();
-			adcDataBuffer.setLength(0);
 			sampleLenCount = 0.0;
 		}
+		if (adcDataBuffer.length() != 0) {
+			adcDataBuffer.setLength(0);
+			adcNumberCount = 1;
+		}
 	}
-
-
-	/**
-	 * Нумерация количества точек на графиике.
-	 */
-	private int adcNumberCount = 1;
-
-	/**
-	 * Счетчик зачений длины образца каждому интервалу
-	 * которого соответствует значения напряжения ацп.
-	 */
-
-	private double sampleLenCount = 0.0;
-
-	/**
-	 * Дискретность длины в мм .
-	 */
-	private static final double SAMPLE_LEN_DELTA = 0.2;
-
-	/**
-	 * Буфер сохраняемых данных для последующей записи в файл.
-	 */
-	private StringBuilder adcDataBuffer = new StringBuilder();
 
 	@Override
 	public void addAdcVal(int val) {
 		ui.getTrace().addPoint(sampleLenCount, val);
 
-		adcDataBuffer.append(adcNumberCount++);
+		adcDataBuffer.append(adcNumberCount);
 		adcDataBuffer.append("\t");
 		adcDataBuffer.append(sampleLenCount);
 		adcDataBuffer.append("\t");
@@ -193,6 +169,7 @@ public class UIEntry implements UART.CallbackADCData{
 		adcDataBuffer.append("\n");
 
 		sampleLenCount = roundDouble(sampleLenCount + SAMPLE_LEN_DELTA);
+		adcNumberCount ++;
 	}
 
 	/**

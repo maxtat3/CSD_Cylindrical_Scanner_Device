@@ -33,6 +33,36 @@ public class UART {
 	}
 
 	/**
+	 * Автоподключение к ком порту устройства.
+	 * Выполняеться полный перебор всех портов в ОС. Далее каждый открытый порт
+	 * проверяеться на пренадлежность к устройству, т.к. к ОС может быть подключено
+	 * несколько устройств.
+	 */
+	public String deviceComPortAutoConnect() {
+		for (String port : Const.COM_PORTS) {
+			boolean isPortOpen = uartInit(port);
+			if (isPortOpen) {
+				identDevice();
+				try {
+					Thread.sleep(300);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				if (isDeviceFound()) {
+
+					return port;
+				}
+			}
+			try {
+				Thread.sleep(75);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Инициализация com порта.
 	 * @param portName имя com порта (например com1, ttyACM0)
 	 * @return true - порт открыт
