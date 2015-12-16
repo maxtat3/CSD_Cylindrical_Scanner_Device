@@ -41,7 +41,7 @@ public class UIEntry implements UART.CallbackADCData{
 	/**
 	 * Экземпляр класса для записи данных в csv файл .
 	 */
-	private Recorder recorder = new Recorder("point number", "Длина образца. мм", "Значение напряжения, В", 300);
+	private Recorder recorder = new Recorder("point number", "Длина образца (мм)", "Значение напряжения (В)", 300);
 
 
 	public UIEntry() {
