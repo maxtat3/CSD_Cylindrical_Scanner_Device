@@ -126,6 +126,7 @@ public class UIEntry implements UART.CallbackADCData{
 		// остановка
 		} else {
 			execCmd(Const.stopMsrCmd);
+			FileUtils.writeToCSV(adcDataBuffer);
 			isStartMsr = false;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_START);
 		}
