@@ -255,6 +255,16 @@ ISR(TIMER2_COMP_vect){
 	
 }
 
+// константа определяющая количество шагов которое нужно пропустить 
+// прежде чем отправить значение ацп с датчика освещенности.
+// Это нужно для синхронизации количества шагов с еденицами измерения длины образца в мм.
+// 95 * 9 = 855 - перемещение каретки на 1 см.  См. SM_FULL_ONE_ROTATE_1CM SM_ONEROTATE_360_DEGR
+// Округлим это значение до 850, т.к. полученные данные приблеженные. 
+// Далее 10 мм делим на 0.2 мм = 50 раз. В 50 раз нужно уменьшить полученное число шагов. 
+// Т.е. 850 делим на 50 = 17 шагов нужно для перемещения червяка на 0.2 мм. 
+// Это приблеженное значение т.к. SM_FULL_ONE_ROTATE_1CM SM_ONEROTATE_360_DEGR требуют калибровки!
+const unsigned char stepAdcSyncConst = 17;
+
 ISR(TIMER1_OVF_vect){
 	// в каком направлении выполняеться движение ШД
 	// false - прямое ; true - обратное
@@ -263,6 +273,7 @@ ISR(TIMER1_OVF_vect){
 	static signed char stepCount = 0;
 	// счетчик шагов ШД в процессе измерения
 	static int smProgressCount = 0;
+	static unsigned char stepAdcSyncCount = 0;
 
 	// прямой ход ШД - выполнение измерений
 	if(smProgressCount < SM_FULL_MSR_STEPS && !isDisableForward){
@@ -272,7 +283,12 @@ ISR(TIMER1_OVF_vect){
 			stepCount ++;
 			if (stepCount > 3) stepCount = 0;
 
-			sendCharToUSART((unsigned char)(adcResult/4));
+			if (stepAdcSyncCount == stepAdcSyncConst){
+				sendCharToUSART((unsigned char)(adcResult/4));
+				stepAdcSyncCount = 0;
+			} else {
+				stepAdcSyncCount ++;
+			}
 
 			smProgressCount ++;
 
