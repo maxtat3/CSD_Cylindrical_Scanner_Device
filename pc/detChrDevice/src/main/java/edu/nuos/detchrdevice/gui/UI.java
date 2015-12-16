@@ -86,7 +86,7 @@ public class UI {
 
 		IAxis axisY = chart.getAxisY();
 		axisY.setPaintGrid(true);
-		IRangePolicy rangePolicy = new RangePolicyFixedViewport(new Range(0, 255));
+		IRangePolicy rangePolicy = new RangePolicyFixedViewport(new Range(Const.Y_AXIS_MIN_VAL, Const.Y_AXIS_MAX_VAL));
 		chart.getAxisY().setRangePolicy(rangePolicy);
 
 		// set a number formatter to get rid of the unnecessary ".0" prefixes for the X-Axis:

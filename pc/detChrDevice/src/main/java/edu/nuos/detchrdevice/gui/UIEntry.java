@@ -150,9 +150,15 @@ public class UIEntry implements UART.CallbackADCData{
 
 	@Override
 	public void addAdcVal(int val) {
-		ui.getTrace().addPoint(sampleLenCount, val);
+		// масштабирование значения ацп
+		double adcTmpRes = (Const.Y_AXIS_MAX_VAL / (double) Const.ADC_SAMPLE_RATE_IN_BITS) * (double) val;
+		// округление до 2-х знаков после точки
+		adcTmpRes = ((int) (100 * adcTmpRes + .5)) / 100.0;
+
+		ui.getTrace().addPoint(sampleLenCount, adcTmpRes);
+		recorder.add(sampleLenCount, adcTmpRes);
+
 		sampleLenCount = roundDouble(sampleLenCount + SAMPLE_LEN_DELTA);
-		recorder.add(sampleLenCount, val);
 	}
 
 	/**

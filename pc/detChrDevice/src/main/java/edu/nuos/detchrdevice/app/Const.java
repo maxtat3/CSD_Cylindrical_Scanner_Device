@@ -23,8 +23,8 @@ public class Const {
 	public static final int MAX_AMOUNT_POINTS_ON_CHART = 1000;
 
 	public static final String BTN_LABEL_START = "start";
-	public static final String BTN_LABEL_STOP = "stop";
 
+	public static final String BTN_LABEL_STOP = "stop";
 	/**
 	 * Команда запуска измерений;
 	 * Последовательность действия команды PC -> MCU
@@ -38,5 +38,10 @@ public class Const {
 	public static final String [] CMD_STOP_MSR = {"a", "b", "k"};
 
 	public static final String[] REQUEST_INIT_DEVICE = {"a", "g", "d"};
+
 	public static final char[] RESPONSE_INIT_DEVICE = {'g', 'h', 'y'};
+
+	public static final int ADC_SAMPLE_RATE_IN_BITS = 255;
+	public static final int Y_AXIS_MIN_VAL = 0;
+	public static final int Y_AXIS_MAX_VAL = 400;
 }
