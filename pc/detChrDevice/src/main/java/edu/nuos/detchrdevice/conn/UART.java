@@ -7,8 +7,6 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
-import javax.swing.*;
-
 /**
  * Управление com портом
  */
@@ -126,7 +124,7 @@ public class UART {
 	 * Выполняеться чтение атомарного ацп преобразования.
 	 */
 	private void readMsrResult() {
-		if (uiEntry.isStartMsr()) {
+		if (uiEntry.isStartMsrFlag()) {
 			try {
 				rxDataBuff = serialPort.readIntArray();
 				if (rxDataBuff != null) {

@@ -20,9 +20,10 @@ public class UIEntry implements UART.CallbackADCData{
 	private static UI ui;
 	private UART uart;
 	/**
-	 * Хранение состояния нажатия на кнопку для запуска или остановки измерений
+	 * Флаг состояния нажатия на кнопку для запуска или остановки измерений.
+	 * true - измерение запущено и выполняеться
 	 */
-	private boolean isStartMsr = false;
+	private boolean isStartMsrFlag = false;
 
 
 	public UIEntry() {
@@ -116,17 +117,17 @@ public class UIEntry implements UART.CallbackADCData{
 	 */
 	private void startStopMeasurement() {
 		// запуск
-		if (ui.getBtnRunMsr().getText().equals(Const.BTN_LABEL_START)) {
+		if (!isStartMsrFlag) {
 			resetPreviousMsr();
-			execCmd(Const.startMsrCmd);
-			isStartMsr = true;
+			execCmd(Const.CMD_START_MSR);
+			isStartMsrFlag = true;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_STOP);
 
 		// остановка
 		} else {
-			execCmd(Const.stopMsrCmd);
+			execCmd(Const.CMD_STOP_MSR);
 			FileUtils.writeToCSV(adcDataBuffer);
-			isStartMsr = false;
+			isStartMsrFlag = false;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_START);
 		}
 	}
@@ -146,6 +147,9 @@ public class UIEntry implements UART.CallbackADCData{
 		}
 	}
 
+	/**
+	 * Сброс предыдущего измерения
+	 */
 	private void resetPreviousMsr() {
 		if (ui.getTrace().getSize() != 0) {
 			ui.getTrace().removeAllPoints();
@@ -162,7 +166,7 @@ public class UIEntry implements UART.CallbackADCData{
 
 	/**
 	 * Счетчик зачений длины образца каждому интервалу
-	 * которого соответствует значения напряжения ацп
+	 * которого соответствует значения напряжения ацп.
 	 */
 
 	private double sampleLenCount = 0.0;
@@ -207,7 +211,7 @@ public class UIEntry implements UART.CallbackADCData{
 	}
 
 
-	public boolean isStartMsr() {
-		return isStartMsr;
+	public boolean isStartMsrFlag() {
+		return isStartMsrFlag;
 	}
 }
