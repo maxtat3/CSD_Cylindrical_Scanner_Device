@@ -94,10 +94,10 @@ public class UIEntry implements UART.CallbackADCData{
 				if (uart.getSerialPort().isOpened()) {
 					try {
 						uart.getSerialPort().closePort();
-						if (!uart.uartInit(portName)) {
-							ui.portClosedMsg(portName);
-						} else {
+						if (uart.uartInit(portName)) {
 							uart.identDevice();
+						} else {
+							ui.portClosedMsg(portName);
 						}
 					} catch (SerialPortException e1) {
 						e1.printStackTrace();
