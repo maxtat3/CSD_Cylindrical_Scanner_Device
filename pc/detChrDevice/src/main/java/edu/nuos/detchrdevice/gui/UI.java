@@ -91,15 +91,6 @@ public class UI {
 		axisY.getAxisTitle().setTitleColor(Const.COLOR_CHART_MAIN);
 		IRangePolicy rangePolicy = new RangePolicyFixedViewport(new Range(Const.Y_AXIS_MIN_VAL, Const.Y_AXIS_MAX_VAL));
 		chart.getAxisY().setRangePolicy(rangePolicy);
-
-		// set a number formatter to get rid of the unnecessary ".0" prefixes for the X-Axis:
-		NumberFormat format = new DecimalFormat("#");
-		// Important!
-		// Or it will allow more than 100 integer digits and rendering will be
-		// confused.
-		// See the comment for java.text.DecimalFormat#applyPattern(String)
-		format.setMaximumIntegerDigits(3);
-		axisY.setFormatter(new LabelFormatterNumber(format));
 	}
 
 	public void deviceNotFoundMsg() {
