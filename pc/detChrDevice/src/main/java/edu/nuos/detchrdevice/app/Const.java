@@ -22,7 +22,7 @@ public class Const {
 	 * При превышении этого количества, функция на графие начинает смещаться влево, таким образом
 	 * чтобы на графике всегда помещалось указанное количество точек.
 	 */
-	public static final int MAX_AMOUNT_POINTS_ON_CHART = 1000;
+	public static final int MAX_AMOUNT_POINTS_ON_CHART = 300;
 
 	public static final String BTN_LABEL_START = "start";
 
