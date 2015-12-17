@@ -8,21 +8,32 @@ import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
 /**
- * Управление com портом
+ * Управление COM портом
  */
 public class UART {
 
 	private CallbackADCData callbackADCData;
-
 	private SerialPort serialPort;
-
-
 	private UIEntry uiEntry;
 
+	/**
+	 * Временный буфер при приеме данных с COM порта
+	 */
 	private int[] rxDataBuff;
 
+	/**
+	 * Флаг обнаружения устройства
+	 * true - устройство опознано
+	 */
 	private boolean isDeviceFound = false;
 
+	/**
+	 * Счетчик правильно полученных символов одной команды.
+	 * Команда состоит из нескольких символов.  Тут работет принцип транзакции.
+	 * Если все символы одной команды совпадают - команда
+	 * считаеться выполненной. Этот счетчик
+	 * применен для определения команды иницализации.
+	 */
 	private int responseCount = 0;
 
 
@@ -63,8 +74,8 @@ public class UART {
 	}
 
 	/**
-	 * Инициализация com порта.
-	 * @param portName имя com порта (например com1, ttyACM0)
+	 * Инициализация COM порта.
+	 * @param portName имя COM порта (например com1, ttyACM0)
 	 * @return true - порт открыт
 	 */
 	public boolean uartInit(String portName){
@@ -92,7 +103,7 @@ public class UART {
 	}
 
 	/**
-	 * Попытка связи с устройством на заданном com порту.
+	 * Попытка связи с устройством на заданном COM порту.
 	 * @return true - устройство опознано
 	 */
 	public boolean identDevice() {
@@ -100,6 +111,11 @@ public class UART {
 		return isDeviceFound;
 	}
 
+	/**
+	 * Обработчик данных получаемых данных от COM порта.
+	 * Метод {@link edu.nuos.detchrdevice.conn.UART.PortReader#serialEvent(SerialPortEvent)}
+	 * срабатывает при получении данных от COM порта.
+	 */
 	private class PortReader implements SerialPortEventListener {
 		@Override
 		public void serialEvent(SerialPortEvent event) {
@@ -169,9 +185,14 @@ public class UART {
 	}
 
 	/**
-	 * This interface must be implement class with handled chart data
+	 * Этот интерфейс должен реализовать тот класс, который
+	 * будет обрабатвыать получаемые результаты от COM порта устройства.
 	 */
 	public interface CallbackADCData {
+		/**
+		 * Метод должен вызываться при получении с COM порта данных.
+		 * @param val значение
+		 */
 		void addAdcVal(int val);
 	}
 

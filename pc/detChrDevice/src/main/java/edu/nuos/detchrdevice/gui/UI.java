@@ -5,15 +5,12 @@ import info.monitorenter.gui.chart.Chart2D;
 import info.monitorenter.gui.chart.IAxis;
 import info.monitorenter.gui.chart.IRangePolicy;
 import info.monitorenter.gui.chart.ITrace2D;
-import info.monitorenter.gui.chart.labelformatters.LabelFormatterNumber;
 import info.monitorenter.gui.chart.rangepolicies.RangePolicyFixedViewport;
 import info.monitorenter.gui.chart.traces.Trace2DLtd;
 import info.monitorenter.util.Range;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 /**
  * Компоновка UI
@@ -38,7 +35,9 @@ public class UI {
 		return UIHolder.UI_INSTANCE;
 	}
 
-
+	/**
+	 * Содание всего UI
+	 */
 	public void buildUI() {
 		JPanel jpChart = new JPanel();
 		jpChart.setLayout(new BoxLayout(jpChart, BoxLayout.Y_AXIS));
@@ -66,6 +65,9 @@ public class UI {
 		mainFrame.setVisible(true);
 	}
 
+	/**
+	 * Построение графика
+	 */
 	private void buildChartUI() {
 		chart = new Chart2D();
 
@@ -93,10 +95,18 @@ public class UI {
 		chart.getAxisY().setRangePolicy(rangePolicy);
 	}
 
+	/**
+	 * Вывод сообщения если устройство не найдено.
+	 * Вызывается как модальное окно.
+	 */
 	public void deviceNotFoundMsg() {
 		JOptionPane.showMessageDialog(null, "Устройство не обнаружено. Попробуйте указать COM порт выручную.", "Предупреждение", JOptionPane.WARNING_MESSAGE);
 	}
 
+	/**
+	 * Вывод сообщения если com порт закрыт.
+	 * Вызывается как модальное окно.
+	 */
 	public void portClosedMsg(String port) {
 		JOptionPane.showMessageDialog(null, "Порт " + port + " закрыт !", "Предупреждение", JOptionPane.WARNING_MESSAGE);
 	}

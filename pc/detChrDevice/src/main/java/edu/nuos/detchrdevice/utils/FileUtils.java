@@ -10,6 +10,10 @@ import java.util.Date;
  */
 public class FileUtils {
 
+	/**
+	 * Запсь данных в файл с расширением csv.
+	 * @param data данные
+	 */
 	public static void writeToCSV(StringBuilder data) {
 		try {
 			FileWriter file = new FileWriter(getCurrentDate() + ".csv");
@@ -23,6 +27,10 @@ public class FileUtils {
 
 	}
 
+	/**
+	 * Получение текущей даты и времени.
+	 * @return дата в текстовом формате
+	 */
 	private static String getCurrentDate(){
 		Date date = new Date();
 		SimpleDateFormat formatDate = new SimpleDateFormat("dd_MM_YYYY__HH_mm_ss");

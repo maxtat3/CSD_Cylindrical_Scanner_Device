@@ -85,7 +85,8 @@ public class Recorder {
 	}
 
 	/**
-	 * Подпись колонок
+	 * Подпись колонок. Если пользователь не задал имя какой либо колонке
+	 * т.е. выстаил null то присваиваеваеться значение по умолчанию.
 	 */
 	private void signColumnLabel() {
 		if (pointNumberColName != null) {
