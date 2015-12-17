@@ -76,16 +76,19 @@ public class UI {
 
 		chart.setFont(new Font("Veranda", Font.BOLD, 14));
 
-		chart.setBackground(Color.BLACK);
-		chart.setForeground(new Color(62, 95, 230));
-		chart.setGridColor(new Color(87, 87, 87));
+		chart.setBackground(Const.COLOR_CHART_BACKGROUND);
+		chart.setForeground(Const.COLOR_CHART_MAIN);
+		chart.setGridColor(Const.COLOR_CHART_AXIS);
 
 		IAxis axisX = chart.getAxisX();
 		axisX.setPaintGrid(true);
-		axisX.setAxisTitle(new IAxis.AxisTitle("Длина листа (мм)"));
+		axisX.setAxisTitle(new IAxis.AxisTitle(Const.TITLE_X_AXIS)); // или так axisX.getAxisTitle().setTitle("abc");
+		axisX.getAxisTitle().setTitleColor(Const.COLOR_CHART_MAIN);
 
 		IAxis axisY = chart.getAxisY();
 		axisY.setPaintGrid(true);
+		axisY.setAxisTitle(new IAxis.AxisTitle(Const.TITLE_Y_AXIS));
+		axisY.getAxisTitle().setTitleColor(Const.COLOR_CHART_MAIN);
 		IRangePolicy rangePolicy = new RangePolicyFixedViewport(new Range(Const.Y_AXIS_MIN_VAL, Const.Y_AXIS_MAX_VAL));
 		chart.getAxisY().setRangePolicy(rangePolicy);
 

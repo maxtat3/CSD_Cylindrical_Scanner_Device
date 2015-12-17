@@ -1,5 +1,7 @@
 package edu.nuos.detchrdevice.app;
 
+import java.awt.*;
+
 /**
  * Константы приложения
  */
@@ -44,4 +46,12 @@ public class Const {
 	public static final int ADC_SAMPLE_RATE_IN_BITS = 255;
 	public static final int Y_AXIS_MIN_VAL = 0;
 	public static final int Y_AXIS_MAX_VAL = 400;
+
+	public static final Color COLOR_CHART_BACKGROUND = Color.BLACK;
+	public static final Color COLOR_CHART_MAIN = new Color(62, 95, 230);
+	public static final Color COLOR_CHART_AXIS = new Color(87, 87, 87);
+	public static final Color COLOR_CHART_AXIS_TITLE = new Color(26, 165, 165);
+
+	public static final String TITLE_X_AXIS = "Длина образца (мм)";
+	public static final String TITLE_Y_AXIS = "Напряжение (мВ)";
 }
