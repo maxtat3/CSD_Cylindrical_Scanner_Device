@@ -86,6 +86,9 @@
 /* задержка между каждым шагом при врещении ШД, это определяет скорсть вращения. Используеться только для парковки в нач состояние ШД */
 #define		SM_DELAY_STEP_MS	5
 
+/* Задержка между данными и командой при отправке в COM порт */
+#define		USART_CMD_OR_DATA_DELAY	7
+
 
 /* Выполнен ли захват ТС1, т.е. включен он (ШД вращаеться) или нет. false - ТС1 свободен (выключен), ШД остановлен; true - ТС1 включен, ШД выполняет вращение */
 volatile bool isBlockTC1 = false;
@@ -126,7 +129,10 @@ void initExtInt0(void);
 void initTC2(void);
 void turnOnTC1(void);
 void turnOffTC1(void);
-void sendCharToUSART(unsigned char sym);
+void sendCmdAndDataToUSART(unsigned char cmd, unsigned char data);
+void sendCmdToUSART(unsigned char cmd);
+void sendDataToUSART(unsigned char data);
+void writeCharToUSART(unsigned char sym);
 unsigned char getCharOfUSART(void);
 bool checkSMInBeginPos(void);
 void stopSM(void);
@@ -159,11 +165,11 @@ int main(void){
 		if (sym == pcToMcuInitDevice[commCount]){
 			commCount ++;
 			if (commCount == sizeof(pcToMcuInitDevice)){
-				sendCharToUSART('g'); //ascii = 103
+				sendDataToUSART('g'); //ascii = 103
 				_delay_ms(15);
-				sendCharToUSART('h'); //ascii = 104
+				sendDataToUSART('h'); //ascii = 104
 				_delay_ms(15);
-				sendCharToUSART('y'); //ascii = 121
+				sendDataToUSART('y'); //ascii = 121
 				_delay_ms(15);
 				commCount = 0;
 			}
@@ -236,8 +242,14 @@ ISR(INT0_vect){
 	_delay_ms(200); // антидребизг
 }
 
-const unsigned char kSecFactor = 10;
+// Множетель для получения больших значений времени срабатывания.
+// Например при ocr2=195 -> t=25 ms. Соответственно для получения
+// времени срабатывания в 1 s этот множетель = 40.
+const unsigned char kSecFactor = 40;
+// Счетчик множетелья.
 volatile unsigned char kSecCount = 0;
+// Переключение уровня сигнала с высокого в низкний
+// и наоборот. Соответсвенно полученим меандр.
 volatile bool isSwithOnMeandr = false;
 ISR(TIMER2_COMP_vect){
 	if (kSecCount == kSecFactor - 1){
@@ -284,7 +296,7 @@ ISR(TIMER1_OVF_vect){
 			if (stepCount > 3) stepCount = 0;
 
 			if (stepAdcSyncCount == stepAdcSyncConst){
-				sendCharToUSART((unsigned char)(adcResult/4));
+				sendCmdAndDataToUSART('M', (unsigned char)(adcResult/4));
 				stepAdcSyncCount = 0;
 			} else {
 				stepAdcSyncCount ++;
@@ -379,12 +391,23 @@ void initExtInt0(){
 }
 
 // настройка ТС2 - генерации меандра 
+// TC2 настроен на режим СТС (сброс при сравнении).
 void initTC2(){
+	// разрешаем прерывания от этого таймера
 	SetBit(TIMSK, OCIE2);
+	// задаем режим СТС. Atmega datasheet p.115 table 42.
 	SetBit(TCCR2, WGM21);
+	// выставляем максимальеый делитель = 1024. Atmega datasheet p.116 table 46.
 	SetBit(TCCR2, CS20);
 	SetBit(TCCR2, CS21);
 	SetBit(TCCR2, CS22);
+	// От этого значения зависит частота срабатывания. Расчет выполняеться по формуле:
+	// f[OCn]= f[clk-io]/(2*N*(1+OCR2))
+	// где N - делитель;
+	// Причем эту полученную частоту нужно разделить пополам: f[OC2]=f[clk-io]
+	// Более детально Atmega datasheet p.109.
+	// Соответственно для ocr2=195 -> t=25 ms.
+	Atmega datasheet p.109
 	OCR2 = 195;
 }
 
@@ -426,8 +449,34 @@ void turnOffTC1(){
 	sei();
 }
 
+// Отправка в COM порт команды затем данных
+void sendCmdAndDataToUSART(unsigned char cmd, unsigned char data){
+	writeCharToUSART(cmd);
+	_delay_ms(USART_CMD_OR_DATA_DELAY);
+	writeCharToUSART(data);
+	_delay_ms(USART_CMD_OR_DATA_DELAY);
+}
+
+// ОТправка в COM порт только команды
+// Данные = 0
+void sendCmdToUSART(unsigned char cmd){
+	writeCharToUSART(cmd);
+	_delay_ms(USART_CMD_OR_DATA_DELAY);
+	writeCharToUSART(0);
+	_delay_ms(USART_CMD_OR_DATA_DELAY);	
+}
+
+// Отправка в COM порт только данных
+// Команда = 0
+void sendDataToUSART(unsigned char data){
+	writeCharToUSART(0);
+	_delay_ms(USART_CMD_OR_DATA_DELAY);
+	writeCharToUSART(data);
+	_delay_ms(USART_CMD_OR_DATA_DELAY);
+}
+
 // отправка символа по usart`у
-void sendCharToUSART(unsigned char sym){
+void writeCharToUSART(unsigned char sym){
 	while(!(UCSRA & (1<<UDRE)));
 	UDR = sym;  
 }

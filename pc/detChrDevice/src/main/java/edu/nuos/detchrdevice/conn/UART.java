@@ -7,6 +7,8 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
+import java.util.Arrays;
+
 /**
  * Управление COM портом
  */
@@ -122,12 +124,49 @@ public class UART {
 			synchronized(event){
 				if(event.isRXCHAR() && event.getEventValue() > 0){
 					if (isDeviceFound) {
-						readMsrResult();
+//						readMsrResult();
+						decoder();
 					} else {
 						tryInitDeviceResponse();
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Переменная которая хранит состояние считываемого значения.
+	 * То есть это команда или данные.
+	 *
+	 * При приеме последовательности Байты команды и данных чередуються.
+	 * Первый Байт - команда, далее данные.
+	 * true - команда , false - данные.
+	 */
+	private boolean isCmd = true;
+
+	/**
+	 * Расшифровует поток байт на команды и данные.
+	 */
+	private void decoder() {
+		try {
+			rxDataBuff = serialPort.readIntArray();
+			if (rxDataBuff == null) return;
+
+
+			if (isCmd) {
+				System.out.println("cmd = " + rxDataBuff[0]);
+				isCmd = false;
+				return;
+			}
+			if (!isCmd) {
+				System.out.println("data = " + rxDataBuff[0]);
+				callbackADCData.addAdcVal(rxDataBuff[0]);
+				isCmd = true;
+				return;
+			}
+
+		} catch (SerialPortException e) {
+			e.printStackTrace();
 		}
 	}
 
