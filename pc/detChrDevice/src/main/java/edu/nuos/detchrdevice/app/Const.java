@@ -47,7 +47,7 @@ public class Const {
 	 * Ответ инициализации устройства. Устройство возвращает эту строку если
 	 * запрос иницализации {@link #REQUEST_INIT_DEVICE} прошел успешно.
 	 */
-	public static final char[] RESPONSE_INIT_DEVICE = {'g', 'h', 'y'};
+	public static final char[] RESPONSE_INIT_DEVICE = {'F', 'G', 'H'};
 
 	/**
 	 * Разрядность АЦП при передаче данных.

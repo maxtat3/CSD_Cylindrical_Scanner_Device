@@ -87,7 +87,9 @@
 #define		SM_DELAY_STEP_MS	5
 
 /* Задержка между данными и командой при отправке в COM порт */
-#define		USART_CMD_OR_DATA_DELAY	7
+#define		USART_CMD_OR_DATA_DELAY	2
+
+#define 	TC0_TCNT_VAL	153
 
 
 /* Выполнен ли захват ТС1, т.е. включен он (ШД вращаеться) или нет. false - ТС1 свободен (выключен), ШД остановлен; true - ТС1 включен, ШД выполняет вращение */
@@ -120,6 +122,16 @@ enum fromPcCommands{
 };
 volatile enum fromPcCommands pcCommand = STDBY;
 
+//======================================
+//	Команды мк -> ПК
+//	Каждая команда занимает только 1 Байт
+//======================================
+const char startMsrCmd = 100; // выполняеться процесс измерений 
+
+
+// Временные переменные для команды и данных
+unsigned char cmdTmp = 0;
+unsigned char dataTmp = 0;
 
 
 void initIO(void);
@@ -127,6 +139,7 @@ void initUSART(void);
 void initADC(void);
 void initExtInt0(void);
 void initTC2(void);
+void initTC0(void);
 void turnOnTC1(void);
 void turnOffTC1(void);
 void sendCmdAndDataToUSART(unsigned char cmd, unsigned char data);
@@ -136,9 +149,10 @@ void writeCharToUSART(unsigned char sym);
 unsigned char getCharOfUSART(void);
 bool checkSMInBeginPos(void);
 void stopSM(void);
-void blinkLed1r();
-void blinkLed2r();
-
+void blinkLed1r(void);
+void blinkLed2r(void);
+void runTC0(void);
+void stopTC0(void);
 
 
 int main(void){
@@ -165,12 +179,12 @@ int main(void){
 		if (sym == pcToMcuInitDevice[commCount]){
 			commCount ++;
 			if (commCount == sizeof(pcToMcuInitDevice)){
-				sendDataToUSART('g'); //ascii = 103
-				_delay_ms(15);
-				sendDataToUSART('h'); //ascii = 104
-				_delay_ms(15);
-				sendDataToUSART('y'); //ascii = 121
-				_delay_ms(15);
+				sendDataToUSART('F'); //ascii = 70
+				_delay_ms(35);
+				sendDataToUSART('G'); //ascii = 71
+				_delay_ms(35);
+				sendDataToUSART('H'); //ascii = 72
+				_delay_ms(35);
 				commCount = 0;
 			}
 		} else 
@@ -242,6 +256,26 @@ ISR(INT0_vect){
 	_delay_ms(200); // антидребизг
 }
 
+
+volatile bool isCmd = true;
+
+ISR(TIMER0_OVF_vect){
+	if (isCmd){
+		writeCharToUSART(cmdTmp);
+		cmdTmp = 0;
+		isCmd = false;
+	} else {
+		writeCharToUSART(dataTmp);
+		dataTmp = 0;
+		isCmd = true;
+		stopTC0();
+		return;
+	}
+
+	TCNT0 = TC0_TCNT_VAL;
+}
+
+
 // Множетель для получения больших значений времени срабатывания.
 // Например при ocr2=195 -> t=25 ms. Соответственно для получения
 // времени срабатывания в 1 s этот множетель = 40.
@@ -296,7 +330,7 @@ ISR(TIMER1_OVF_vect){
 			if (stepCount > 3) stepCount = 0;
 
 			if (stepAdcSyncCount == stepAdcSyncConst){
-				sendCmdAndDataToUSART('M', (unsigned char)(adcResult/4));
+				sendCmdAndDataToUSART(startMsrCmd, (unsigned char)(adcResult/4));
 				stepAdcSyncCount = 0;
 			} else {
 				stepAdcSyncCount ++;
@@ -407,9 +441,10 @@ void initTC2(){
 	// Причем эту полученную частоту нужно разделить пополам: f[OC2]=f[clk-io]
 	// Более детально Atmega datasheet p.109.
 	// Соответственно для ocr2=195 -> t=25 ms.
-	Atmega datasheet p.109
 	OCR2 = 195;
 }
+
+
 
 
 // Запуск ТС1 
@@ -451,28 +486,25 @@ void turnOffTC1(){
 
 // Отправка в COM порт команды затем данных
 void sendCmdAndDataToUSART(unsigned char cmd, unsigned char data){
-	writeCharToUSART(cmd);
-	_delay_ms(USART_CMD_OR_DATA_DELAY);
-	writeCharToUSART(data);
-	_delay_ms(USART_CMD_OR_DATA_DELAY);
+	cmdTmp = cmd;
+	dataTmp = data;
+	runTC0();
 }
 
 // ОТправка в COM порт только команды
 // Данные = 0
 void sendCmdToUSART(unsigned char cmd){
-	writeCharToUSART(cmd);
-	_delay_ms(USART_CMD_OR_DATA_DELAY);
-	writeCharToUSART(0);
-	_delay_ms(USART_CMD_OR_DATA_DELAY);	
+	cmdTmp = cmd;
+	dataTmp = 0;
+	runTC0();
 }
 
 // Отправка в COM порт только данных
 // Команда = 0
 void sendDataToUSART(unsigned char data){
-	writeCharToUSART(0);
-	_delay_ms(USART_CMD_OR_DATA_DELAY);
-	writeCharToUSART(data);
-	_delay_ms(USART_CMD_OR_DATA_DELAY);
+	cmdTmp = 0;
+	dataTmp = data;
+	runTC0();
 }
 
 // отправка символа по usart`у
@@ -523,8 +555,6 @@ void stopSM(){
 	ClearBit(SM_PORT, SM_WIRE_4);
 }
 
-
-
 void blinkLed1r(){
 	SetBit(STATE_LED_PORT, STATE_LED);
 	_delay_ms(100);
@@ -539,4 +569,26 @@ void blinkLed2r(){
 	SetBit(STATE_LED_PORT, STATE_LED);
 	_delay_ms(30);
 	ClearBit(STATE_LED_PORT, STATE_LED);
+}
+
+// Запуска ТС0 в прерывании которого 
+// выполняеться отправка Байта команды и данных по UART.
+void runTC0(){
+	SetBit(TIMSK, TOIE0);
+
+	TCNT0 = TC0_TCNT_VAL;
+
+	//делитель 1024
+	SetBit(TCCR0, 	CS00);
+	ClearBit(TCCR0,	CS01);
+	SetBit(TCCR0,	CS02);
+}
+
+// Остановка ТС0. После отправки Байта команды и 
+// данных по UART таймер должен вызвать этот метод , тем самым
+// сам остановвиться.
+void stopTC0(){
+	ClearBit(TCCR0,	CS00);
+	ClearBit(TCCR0,	CS01);
+	ClearBit(TCCR0,	CS02);
 }

@@ -118,7 +118,7 @@ public class UIEntry implements UART.CallbackADCData{
 		// остановка
 		} else {
 			execCmd(Const.CMD_STOP_MSR);
-			recorder.save();
+			saveRecordData();
 			isStartMsrFlag = false;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_START);
 		}
@@ -157,7 +157,7 @@ public class UIEntry implements UART.CallbackADCData{
 		adcTmpRes = ((int) (100 * adcTmpRes + .5)) / 100.0;
 
 		ui.getTrace().addPoint(sampleLenCount, adcTmpRes);
-		recorder.add(sampleLenCount, adcTmpRes);
+		addRecordData(sampleLenCount, adcTmpRes);
 
 		sampleLenCount = roundDouble(sampleLenCount + SAMPLE_LEN_DELTA);
 	}
@@ -180,5 +180,25 @@ public class UIEntry implements UART.CallbackADCData{
 
 	public boolean isStartMsrFlag() {
 		return isStartMsrFlag;
+	}
+
+	public boolean stopMsr() {
+		if (isStartMsrFlag) {
+			startStopMeasurement();
+			return true;
+		}
+		return false;
+	}
+
+	private void addRecordData(double x, double y) {
+		if (ui.getJchbRecordData().isSelected()) {
+			recorder.add(x, y);
+		}
+	}
+
+	private void saveRecordData() {
+		if (ui.getJchbRecordData().isSelected()) {
+			recorder.save();
+		}
 	}
 }

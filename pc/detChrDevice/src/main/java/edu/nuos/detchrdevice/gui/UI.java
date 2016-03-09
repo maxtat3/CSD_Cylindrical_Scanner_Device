@@ -19,6 +19,7 @@ public class UI {
 
 	private JButton btnRunMsr = null;
 	private JComboBox jcmboxComPort;
+	private JCheckBox jchbRecordData;
 	private Chart2D chart;
 	private ITrace2D trace;
 	private JFrame mainFrame;
@@ -45,7 +46,12 @@ public class UI {
 		btnRunMsr = new JButton(Const.BTN_LABEL_START);
 
 		jcmboxComPort = new JComboBox();
+		jcmboxComPort.setMaximumSize(new Dimension(135, Short.MAX_VALUE));
 		jcmboxComPort.setModel(new DefaultComboBoxModel(Const.COM_PORTS));
+
+		jchbRecordData = new JCheckBox();
+		jchbRecordData.setText("Record data ?");
+		jchbRecordData.setMaximumSize(new Dimension(135, Short.MAX_VALUE));
 
 		buildChartUI();
 
@@ -53,6 +59,7 @@ public class UI {
 		jpDir.setLayout(new BoxLayout(jpDir, BoxLayout.X_AXIS));
 		jpDir.add(btnRunMsr);
 		jpDir.add(jcmboxComPort);
+		jpDir.add(jchbRecordData);
 		jpChart.add(chart);
 
 		mainFrame = new JFrame();
@@ -113,6 +120,10 @@ public class UI {
 
 	public JButton getBtnRunMsr() {
 		return btnRunMsr;
+	}
+
+	public JCheckBox getJchbRecordData() {
+		return jchbRecordData;
 	}
 
 	public JComboBox getJcmboxComPort() {

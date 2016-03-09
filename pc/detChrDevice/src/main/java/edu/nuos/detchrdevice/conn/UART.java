@@ -7,7 +7,6 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
-import java.util.Arrays;
 
 /**
  * Управление COM портом
@@ -30,7 +29,7 @@ public class UART {
 	private boolean isDeviceFound = false;
 
 	/**
-	 * Счетчик правильно полученных символов одной команды.
+	 * Счетчик правильно полученных символов одной команды от устройства.
 	 * Команда состоит из нескольких символов.  Тут работет принцип транзакции.
 	 * Если все символы одной команды совпадают - команда
 	 * считаеться выполненной. Этот счетчик
@@ -124,11 +123,11 @@ public class UART {
 			synchronized(event){
 				if(event.isRXCHAR() && event.getEventValue() > 0){
 					if (isDeviceFound) {
-//						readMsrResult();
 						decoder();
 					} else {
 						tryInitDeviceResponse();
 					}
+//					System.out.println("@ rx = " + rxDataBuff[0]);
 				}
 			}
 		}
@@ -144,6 +143,8 @@ public class UART {
 	 */
 	private boolean isCmd = true;
 
+
+	private int cmd;
 	/**
 	 * Расшифровует поток байт на команды и данные.
 	 */
@@ -152,17 +153,17 @@ public class UART {
 			rxDataBuff = serialPort.readIntArray();
 			if (rxDataBuff == null) return;
 
-
+			// команда
 			if (isCmd) {
-				System.out.println("cmd = " + rxDataBuff[0]);
+				cmd = rxDataBuff[0];
+				System.out.println("cmd = " + cmd);
 				isCmd = false;
-				return;
-			}
-			if (!isCmd) {
-				System.out.println("data = " + rxDataBuff[0]);
-				callbackADCData.addAdcVal(rxDataBuff[0]);
+			} else { // данные
+				if (cmd == 100) {
+					System.out.println("data = " + rxDataBuff[0]);
+					callbackADCData.addAdcVal(rxDataBuff[0]);
+				}
 				isCmd = true;
-				return;
 			}
 
 		} catch (SerialPortException e) {
@@ -192,6 +193,7 @@ public class UART {
 	private void tryInitDeviceResponse() {
 		try {
 			rxDataBuff = serialPort.readIntArray();
+			System.out.println(">>> response data = " + rxDataBuff[0]);
 		} catch (SerialPortException e) {
 			e.printStackTrace();
 		}
@@ -201,6 +203,7 @@ public class UART {
 		if (responseCount == Const.RESPONSE_INIT_DEVICE.length) {
 			isDeviceFound = true;
 			responseCount = 0;
+			isCmd = true;
 		}
 	}
 
