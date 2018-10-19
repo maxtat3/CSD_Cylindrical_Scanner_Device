@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name MP1584EN-LF-Z)(type Legacy)(uri ${KIPRJMOD}/lib/MP1584/MP1584EN-LF-Z.lib)(options "")(descr ""))
+  (lib (name LP2951-33-SO8)(type Legacy)(uri ${KIPRJMOD}/lib/LP2951-33-SO8/LP2951-33-SO8.lib)(options "")(descr ""))
+  (lib (name MCP3421A1T-E_CH)(type Legacy)(uri ${KIPRJMOD}/lib/MCP3421A1T-E_CH/MCP3421A1T-E_CH.lib)(options "")(descr ""))
+)

@@ -1,0 +1,106 @@
+PCBNEW-LibModule-V1  
+# encoding utf-8
+Units mm
+$INDEX
+SOIC127P600X170-9N
+$EndINDEX
+$MODULE SOIC127P600X170-9N
+Po 0 0 0 15 00000000 00000000 ~~
+Li SOIC127P600X170-9N
+Cd 
+Sc 00000000
+At SMD
+Op 0 0 0
+.SolderMask 0
+.SolderPaste 0
+T0 -0.862963 -4.0195 1.00346 1.00346 0 0.05 N V 21 "SOIC127P600X170-9N"
+T1 -0.296423 3.75211 1.00417 1.00417 0 0.05 N V 21 "VAL**"
+DC -4.04 -1.98 -3.94 -1.98 0.2 21
+DC -4.044 -1.977 -3.944 -1.977 0.2 24
+DS 2 -2.5 2 2.5 0.127 24
+DS 2 2.5 -2 2.5 0.127 24
+DS -2 2.5 -2 -2.5 0.127 24
+DS -2 -2.5 2 -2.5 0.127 24
+DS 2 -2.5 -2 -2.5 0.127 21
+DS -2 2.5 2 2.5 0.127 21
+DS -3.71 -2.75 3.71 -2.75 0.05 26
+DS 3.71 -2.75 3.71 2.75 0.05 26
+DS 3.71 2.75 -3.71 2.75 0.05 26
+DS -3.71 2.75 -3.71 -2.75 0.05 26
+DP 0 0 0 0 4 0 19
+Dl -0.764418 -1.04
+Dl 0.762 -1.04
+Dl 0.762 1.0433
+Dl -0.764418 1.0433
+$PAD
+Sh "5" R 1.97 0.6 0 0 0
+At SMD N 00888000
+.SolderMask 0
+.SolderPaste 0
+Ne 0 ""
+Po 2.475 1.905
+$EndPAD
+$PAD
+Sh "2" R 1.97 0.6 0 0 0
+At SMD N 00888000
+.SolderMask 0
+.SolderPaste 0
+Ne 0 ""
+Po -2.475 -0.635
+$EndPAD
+$PAD
+Sh "3" R 1.97 0.6 0 0 0
+At SMD N 00888000
+.SolderMask 0
+.SolderPaste 0
+Ne 0 ""
+Po -2.475 0.635
+$EndPAD
+$PAD
+Sh "4" R 1.97 0.6 0 0 0
+At SMD N 00888000
+.SolderMask 0
+.SolderPaste 0
+Ne 0 ""
+Po -2.475 1.905
+$EndPAD
+$PAD
+Sh "6" R 1.97 0.6 0 0 0
+At SMD N 00888000
+.SolderMask 0
+.SolderPaste 0
+Ne 0 ""
+Po 2.475 0.635
+$EndPAD
+$PAD
+Sh "7" R 1.97 0.6 0 0 0
+At SMD N 00888000
+.SolderMask 0
+.SolderPaste 0
+Ne 0 ""
+Po 2.475 -0.635
+$EndPAD
+$PAD
+Sh "8" R 1.97 0.6 0 0 0
+At SMD N 00888000
+.SolderMask 0
+.SolderPaste 0
+Ne 0 ""
+Po 2.475 -1.905
+$EndPAD
+$PAD
+Sh "1" R 1.97 0.6 0 0 0
+At SMD N 00888000
+.SolderMask 0
+.SolderPaste 0
+Ne 0 ""
+Po -2.475 -1.905
+$EndPAD
+$PAD
+Sh "9" R 2.41 3.3 0 0 0
+At SMD N 00888000
+.SolderMask 0
+Ne 0 ""
+Po 0 0
+$EndPAD
+$EndMODULE SOIC127P600X170-9N
