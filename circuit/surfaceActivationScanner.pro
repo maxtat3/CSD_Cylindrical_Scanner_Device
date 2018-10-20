@@ -1,4 +1,4 @@
-update=Чт 18 окт 2018 15:42:07
+update=Сб 20 окт 2018 11:59:40
 version=1
 last_client=kicad
 [general]
@@ -34,10 +34,10 @@ LibDir=
 [schematic_editor]
 version=1
 PageLayoutDescrFile=
-PlotDirectoryName=
+PlotDirectoryName=print
 SubpartIdSeparator=0
 SubpartFirstId=65
-NetFmtName=
+NetFmtName=Pcbnew
 SpiceAjustPassiveValues=0
 LabSize=50
 ERC_TestSimilarLabels=1

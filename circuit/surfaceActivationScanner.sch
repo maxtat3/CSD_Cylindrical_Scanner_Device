@@ -44,7 +44,7 @@ U 1 1 5BC4194C
 P 2700 3900
 F 0 "U4" H 2700 4267 50  0000 C CNN
 F 1 "LM324" H 2700 4176 50  0000 C CNN
-F 2 "" H 2650 4000 50  0001 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 2650 4000 50  0001 C CNN
 F 3 "http://www.ti.com/lit/ds/symlink/lm2902-n.pdf" H 2750 4100 50  0001 C CNN
 F 4 "000000020" H 2700 3900 50  0001 C CNN "Article"
 	1    2700 3900
@@ -1683,7 +1683,6 @@ NoConn ~ 7300 3425
 NoConn ~ 7300 3525
 NoConn ~ 7300 3825
 NoConn ~ 7300 3925
-NoConn ~ 7300 4425
 NoConn ~ 1400 7050
 NoConn ~ 1400 6850
 NoConn ~ 1400 6650
@@ -1919,10 +1918,16 @@ Wire Wire Line
 Connection ~ 4025 1375
 Wire Wire Line
 	4025 1375 4275 1375
+Wire Wire Line
+	7900 4425 7300 4425
 Wire Bus Line
 	5075 5675 8000 5675
 Wire Bus Line
 	5075 2775 5075 5675
 Wire Bus Line
 	8000 2500 8000 5675
+Entry Wire Line
+	7900 4425 8000 4525
+Text Label 7875 4425 2    50   ~ 0
+smen
 $EndSCHEMATC
