@@ -15,7 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L MCU_Microchip_ATmega:ATmega8-16AU U3
+L surfaceActivationScanner-rescue:ATmega8-16AU-MCU_Microchip_ATmega U3
 U 1 1 5BC410A9
 P 6700 3725
 F 0 "U3" H 6300 5175 50  0000 C CNN
@@ -34,7 +34,7 @@ F 0 "U5" H 1650 7550 50  0000 C CNN
 F 1 "FT232RL" H 2700 7550 50  0000 C CNN
 F 2 "Package_SO:SSOP-28_5.3x10.2mm_P0.65mm" H 2200 6650 50  0001 C CNN
 F 3 "http://www.ftdichip.com/Products/ICs/FT232RL.htm" H 2200 6650 50  0001 C CNN
-F 4 "-" H 2200 6650 50  0001 C CNN "Article"
+F 4 "000002281" H 2200 6650 50  0001 C CNN "Article"
 	1    2200 6650
 	1    0    0    -1  
 $EndComp
@@ -92,6 +92,7 @@ F 0 "RV1" V 1438 2650 50  0000 C CNN
 F 1 "1k" V 1347 2650 50  0000 C CNN
 F 2 "Potentiometer_THT:Potentiometer_Vishay_T7-YA_Single_Vertical" H 1550 2650 50  0001 C CNN
 F 3 "~" H 1550 2650 50  0001 C CNN
+F 4 "000012071" V 1550 2650 50  0001 C CNN "Article"
 	1    1550 2650
 	0    -1   -1   0   
 $EndComp
@@ -126,7 +127,7 @@ F 0 "Y1" V 6450 3325 50  0000 R CNN
 F 1 "7.3728 MHz" V 6350 3325 50  0000 R CNN
 F 2 "Crystal:Crystal_HC49-U_Vertical" H 6000 2825 50  0001 C CNN
 F 3 "~" H 6000 2825 50  0001 C CNN
-F 4 "-" V 6000 2825 50  0001 C CNN "Article"
+F 4 "000003646" V 6000 2825 50  0001 C CNN "Article"
 	1    6000 2825
 	0    -1   -1   0   
 $EndComp
@@ -940,7 +941,7 @@ F 0 "C3" H 4175 1475 50  0000 L CNN
 F 1 "100uF 6.3V" H 4025 1375 50  0000 L CNN
 F 2 "Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B" H 4275 1175 50  0001 C CNN
 F 3 "~" H 4275 1175 50  0001 C CNN
-F 4 "-" H 4275 1175 50  0001 C CNN "Article"
+F 4 "000006671" H 4275 1175 50  0001 C CNN "Article"
 	1    4275 1175
 	1    0    0    -1  
 $EndComp
@@ -1920,14 +1921,14 @@ Wire Wire Line
 	4025 1375 4275 1375
 Wire Wire Line
 	7900 4425 7300 4425
+Entry Wire Line
+	7900 4425 8000 4525
+Text Label 7875 4425 2    50   ~ 0
+smen
 Wire Bus Line
 	5075 5675 8000 5675
 Wire Bus Line
 	5075 2775 5075 5675
 Wire Bus Line
 	8000 2500 8000 5675
-Entry Wire Line
-	7900 4425 8000 4525
-Text Label 7875 4425 2    50   ~ 0
-smen
 $EndSCHEMATC
