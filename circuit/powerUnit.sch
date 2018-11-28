@@ -43,7 +43,7 @@ F 4 "000003302" H 2825 3000 50  0001 C CNN "Article"
 	1    0    0    -1  
 $EndComp
 $Comp
-L MP1584EN-LF-Z:MP1584EN-LF-Z U?
+L surfaceActivationScanner-rescue:MP1584EN-LF-Z-MP1584EN-LF-Z U?
 U 1 1 5BCDDC77
 P 3600 3650
 AR Path="/5BCDDC77" Ref="U?"  Part="1" 
@@ -54,6 +54,7 @@ F 2 "Package_SO:SOIC-8-1EP_3.9x4.9mm_P1.27mm_EP2.35x2.35mm" H 3600 3650 50  0001
 F 3 "MP1584 Series 28 V 3 A 1.5 MHz SMT Step-Down Converter - SOIC-8E" H 3600 3650 50  0001 L BNN
 F 4 "Monolithic Power" H 3600 3650 50  0001 L BNN "Field4"
 F 5 "SOIC-8 Monolithic Power Systems" H 3600 3650 50  0001 L BNN "Field5"
+F 6 "000011495" H 3600 3650 50  0001 C CNN "Article"
 	1    3600 3650
 	1    0    0    -1  
 $EndComp
@@ -214,7 +215,7 @@ F 0 "RV5" V 5350 4200 50  0000 R CNN
 F 1 "1k" V 5350 4000 50  0000 R CNN
 F 2 "Potentiometer_THT:Potentiometer_Vishay_T7-YA_Single_Vertical" H 5450 4050 50  0001 C CNN
 F 3 "~" H 5450 4050 50  0001 C CNN
-F 4 "-" V 5450 4050 50  0001 C CNN "Article"
+F 4 "000012071" V 5450 4050 50  0001 C CNN "Article"
 	1    5450 4050
 	0    -1   -1   0   
 $EndComp
@@ -242,7 +243,7 @@ F 0 "C31" H 4600 4225 50  0000 L CNN
 F 1 "220pF" H 4525 4125 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric" H 4463 4050 50  0001 C CNN
 F 3 "~" H 4425 4200 50  0001 C CNN
-F 4 "-" H 4425 4200 50  0001 C CNN "Article"
+F 4 "000013353" H 4425 4200 50  0001 C CNN "Article"
 	1    4425 4200
 	1    0    0    -1  
 $EndComp
