@@ -40,6 +40,42 @@
 *.sym
 
 
+
+### KiCad ###
+# See actual version https://github.com/github/gitignore/blob/master/KiCad.gitignore 
+# Format documentation: http://kicad-pcb.org/help/file-formats/
+
+# Temporary files
+*.000
+*.bak
+*.bck
+*.kicad_pcb-bak
+*~
+_autosave-*
+*.tmp
+*-rescue.lib
+*-save.pro
+*-save.kicad_pcb
+
+# Netlist files (exported from Eeschema)
+*.net
+
+# Autorouter files (exported from Pcbnew)
+*.dsn
+*.ses
+
+# Exported BOM files
+*.xml
+*.csv
+
+# Postscript vector image files
+*.ps
+
+# PCB module archives and other zip archives
+.zip
+
+
+
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ
 
@@ -84,25 +120,16 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 
+
+
 ### Java ###
 *.class
 
 # Package Files #
 *.jar
 
-### Circuit ###
-# backup files
-*.bak
 
-# postscript vector image files
-*.ps
-
-# pcb module archives and other zip archives
-.zip
 
 ### Information ###
 .~lock.help.odt#
 info/*.pdf
-
-### Generated data files ###
-*.csv
