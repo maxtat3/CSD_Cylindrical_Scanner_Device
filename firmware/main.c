@@ -3,12 +3,8 @@
 #include <avr/interrupt.h>
 #include <util/atomic.h>
 #include <stdbool.h>
+#include "bit_macros.h"
 
-
-#define		SetBit(reg, bit)		reg |= (1<<bit)		//Установить бит в "1" (bit) в регистре (reg),  не трогая все остальные
-#define		ClearBit(reg, bit)		reg &= (~(1<<bit))	//Сбросить  бит (bit) в регистре (reg),  не трогая все остальные
-#define		IsSetBit(reg, bit)		((reg & (1<<bit)) != 0)	//Проверка, установле ли  разряд (bit) в регистре (reg) ?
-#define		IsClearBit(reg, bit)		((reg & (1<<bit)) == 0)	//Проверка, очищен ли разряд (bit) в регистре (reg) ?
 
 // ==========================================
 // 			Шаговый двигатель
@@ -292,10 +288,10 @@ ISR(TIMER2_COMP_vect){
 	if (kSecCount == kSecFactor - 1){
 		kSecCount = 0;
 		if (!isSwithOnMeandr){
-			SetBit(MEANDER_PORT, MEANDER);
+			sbi(MEANDER_PORT, MEANDER);
 			isSwithOnMeandr = true;
 		} else {
-			ClearBit(MEANDER_PORT, MEANDER);
+			cbi(MEANDER_PORT, MEANDER);
 			isSwithOnMeandr = false;
 		}
 	} else {
@@ -379,24 +375,24 @@ ISR(TIMER1_OVF_vect){
 /* инициализация портов в/в */
 void initIO(void){
 	/* Настприваем на ВЫХОД порт к которым подклчен ИП для ШД */
-	SetBit(SM_DDR, SM_EN);
+	sbi(SM_DDR, SM_EN);
 
 	/* Настприваем на ВЫХОД порты к которым подклчен двигатель */
-	SetBit(SM_DDR, SM_WIRE_1);
-	SetBit(SM_DDR, SM_WIRE_2);
-	SetBit(SM_DDR, SM_WIRE_3);
-	SetBit(SM_DDR, SM_WIRE_4);
+	sbi(SM_DDR, SM_WIRE_1);
+	sbi(SM_DDR, SM_WIRE_2);
+	sbi(SM_DDR, SM_WIRE_3);
+	sbi(SM_DDR, SM_WIRE_4);
 
 	stopSM();
 
 	/* Настриваем на ВХОД порт для подключения опто-прерывателя */
-	ClearBit(OPTO_SENSOR_DDR, OPTO_SENSOR);
+	cbi(OPTO_SENSOR_DDR, OPTO_SENSOR);
 	
 	/* Настриваем на ВЫХОД порт для подключения state led  */
-	SetBit(STATE_LED_DDR, STATE_LED);
+	sbi(STATE_LED_DDR, STATE_LED);
 
 	/* Настриваем на ВЫХОД порт для меандра  */
-	SetBit(MEANDER_DDR, MEANDER); 
+	sbi(MEANDER_DDR, MEANDER); 
 }
 
 void initUSART(){
@@ -424,23 +420,23 @@ void initADC(void){
 // настройка прерывания от внешнего источник (кнопки)
 void initExtInt0(){
 	// срабатывание по низкому уровню на выводе INT0
-	ClearBit(MCUCR, ISC00);
-	ClearBit(MCUCR, ISC01);
+	cbi(MCUCR, ISC00);
+	cbi(MCUCR, ISC01);
 	// резрещаем внешние прерывания
-	SetBit(GICR, INT0);
+	sbi(GICR, INT0);
 }
 
 // настройка ТС2 - генерации меандра 
 // TC2 настроен на режим СТС (сброс при сравнении).
 void initTC2(){
 	// разрешаем прерывания от этого таймера
-	SetBit(TIMSK, OCIE2);
+	sbi(TIMSK, OCIE2);
 	// задаем режим СТС. Atmega datasheet p.115 table 42.
-	SetBit(TCCR2, WGM21);
+	sbi(TCCR2, WGM21);
 	// выставляем максимальеый делитель = 1024. Atmega datasheet p.116 table 46.
-	SetBit(TCCR2, CS20);
-	SetBit(TCCR2, CS21);
-	SetBit(TCCR2, CS22);
+	sbi(TCCR2, CS20);
+	sbi(TCCR2, CS21);
+	sbi(TCCR2, CS22);
 	// От этого значения зависит частота срабатывания. Расчет выполняеться по формуле:
 	// f[OCn]= f[clk-io]/(2*N*(1+OCR2))
 	// где N - делитель;
@@ -457,19 +453,19 @@ void initTC2(){
 void turnOnTC1(){
 	isBlockTC1 = true;
 	// разрешаем прерывания при переполнении
-	SetBit(TIMSK, TOIE1);
+	sbi(TIMSK, TOIE1);
 
 	// устанавливаем делитель частоты 64
-	SetBit(TCCR1B, CS10);
-	SetBit(TCCR1B, CS11);
-	ClearBit(TCCR1B, CS12);
+	sbi(TCCR1B, CS10);
+	sbi(TCCR1B, CS11);
+	cbi(TCCR1B, CS12);
 	
 	// устанавливаем нормальный режим
 	// в этом режиме OCR1A нельзя изменить, OCR1A = 0xFFFF
-	ClearBit(TCCR1A, WGM10);
-	ClearBit(TCCR1A, WGM11);
-	ClearBit(TCCR1B, WGM12);
-	ClearBit(TCCR1B, WGM13);
+	cbi(TCCR1A, WGM10);
+	cbi(TCCR1A, WGM11);
+	cbi(TCCR1B, WGM12);
+	cbi(TCCR1B, WGM13);
 
 	// подстраиваим частоту срабатываения
 	TCNT1 = TCNT1_SM_FORVARD_MOVE;
@@ -479,9 +475,9 @@ void turnOnTC1(){
 void turnOffTC1(){
 	cli();
 	// выключение таймера
-	ClearBit(TCCR1B, CS10);
-	ClearBit(TCCR1B, CS11);
-	ClearBit(TCCR1B, CS12);
+	cbi(TCCR1B, CS10);
+	cbi(TCCR1B, CS11);
+	cbi(TCCR1B, CS12);
 
 	stopSM();
 
@@ -535,7 +531,7 @@ unsigned char getCharOfUSART(void){
 // Обратный ход ШД до закрытия окна опто-прерывателя
 bool checkSMInBeginPos(){
 	cli();
-	while (IsClearBit(OPTO_SENSOR_PIN, OPTO_SENSOR)){
+	while (iscbi(OPTO_SENSOR_PIN, OPTO_SENSOR)){
 		SM_PORT = smTableNormalStep[3];
 		_delay_ms(SM_DELAY_STEP_MS);
 	
@@ -556,47 +552,47 @@ bool checkSMInBeginPos(){
 // остановка ШД - снятия напряжения с управляющих выводов
 // отключение ИП для ШД
 void stopSM(){
-	ClearBit(SM_PORT, SM_EN);
-	ClearBit(SM_PORT, SM_WIRE_1);
-	ClearBit(SM_PORT, SM_WIRE_2);
-	ClearBit(SM_PORT, SM_WIRE_3);
-	ClearBit(SM_PORT, SM_WIRE_4);
+	cbi(SM_PORT, SM_EN);
+	cbi(SM_PORT, SM_WIRE_1);
+	cbi(SM_PORT, SM_WIRE_2);
+	cbi(SM_PORT, SM_WIRE_3);
+	cbi(SM_PORT, SM_WIRE_4);
 }
 
 void blinkLed1r(){
-	SetBit(STATE_LED_PORT, STATE_LED);
+	sbi(STATE_LED_PORT, STATE_LED);
 	_delay_ms(100);
-	ClearBit(STATE_LED_PORT, STATE_LED);
+	cbi(STATE_LED_PORT, STATE_LED);
 }
 
 void blinkLed2r(){
-	SetBit(STATE_LED_PORT, STATE_LED);
+	sbi(STATE_LED_PORT, STATE_LED);
 	_delay_ms(30);
-	ClearBit(STATE_LED_PORT, STATE_LED);
+	cbi(STATE_LED_PORT, STATE_LED);
 	_delay_ms(30);
-	SetBit(STATE_LED_PORT, STATE_LED);
+	sbi(STATE_LED_PORT, STATE_LED);
 	_delay_ms(30);
-	ClearBit(STATE_LED_PORT, STATE_LED);
+	cbi(STATE_LED_PORT, STATE_LED);
 }
 
 // Запуска ТС0 в прерывании которого 
 // выполняеться отправка Байта команды и данных по UART.
 void runTC0(){
-	SetBit(TIMSK, TOIE0);
+	sbi(TIMSK, TOIE0);
 
 	TCNT0 = TC0_TCNT_VAL;
 
 	//делитель 1024
-	SetBit(TCCR0, 	CS00);
-	ClearBit(TCCR0,	CS01);
-	SetBit(TCCR0,	CS02);
+	sbi(TCCR0, 	CS00);
+	cbi(TCCR0,	CS01);
+	sbi(TCCR0,	CS02);
 }
 
 // Остановка ТС0. После отправки Байта команды и 
 // данных по UART таймер должен вызвать этот метод , тем самым
 // сам остановвиться.
 void stopTC0(){
-	ClearBit(TCCR0,	CS00);
-	ClearBit(TCCR0,	CS01);
-	ClearBit(TCCR0,	CS02);
+	cbi(TCCR0,	CS00);
+	cbi(TCCR0,	CS01);
+	cbi(TCCR0,	CS02);
 }
