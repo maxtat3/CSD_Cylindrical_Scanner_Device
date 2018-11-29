@@ -97,22 +97,22 @@ volatile bool isBlockTC1 = false;
 // запоминае состояние состояния кнопки запуска/остановки процееса измерений
 volatile bool btnStateFlag = false;
 
-volatile unsigned char usartRxBuf = 0;	//однобайтный буфер
-volatile unsigned char lowByte; // младший байт ацп преобразования
-volatile unsigned int adcResult; // результат ацп 
+volatile uint8_t usartRxBuf = 0;	//однобайтный буфер
+volatile uint8_t lowByte; // младший байт ацп преобразования
+volatile uint16_t adcResult; // результат ацп 
 
 // таблица шагов ШД , нормальный шаг
 // const char smTableNormalStep[] = {_BV(SM_WIRE_1), _BV(SM_WIRE_2), _BV(SM_WIRE_3), _BV(SM_WIRE_4)};
-const char smTableNormalStep[] = {_BV(SM_WIRE_4), _BV(SM_WIRE_3), _BV(SM_WIRE_2), _BV(SM_WIRE_1)};
+const int8_t smTableNormalStep[] = {_BV(SM_WIRE_4), _BV(SM_WIRE_3), _BV(SM_WIRE_2), _BV(SM_WIRE_1)};
 
 //======================================
 //	Команды от ПК
 //	Каждая команда - массив символов
 //======================================
-char pcToMcuStartMeasureComm[] = {'a', 'q', 'l'};
-char pcToMcuStopMeasureComm[] = {'a', 'b', 'k'};
-char pcToMcuInitDevice[] = {'a', 'g', 'd'};
-int commCount = 0; //общий счетчик для определения совпадения команды посимвольно 
+int8_t pcToMcuStartMeasureComm[] = {'a', 'q', 'l'};
+int8_t pcToMcuStopMeasureComm[] = {'a', 'b', 'k'};
+int8_t pcToMcuInitDevice[] = {'a', 'g', 'd'};
+int16_t commCount = 0; //общий счетчик для определения совпадения команды посимвольно 
 /* Перечислегние команд от ПК */
 enum fromPcCommands{
 	STDBY,
@@ -125,12 +125,12 @@ volatile enum fromPcCommands pcCommand = STDBY;
 //	Команды мк -> ПК
 //	Каждая команда занимает только 1 Байт
 //======================================
-const char startMsrCmd = 100; // выполняеться процесс измерений 
+const int8_t startMsrCmd = 100; // выполняеться процесс измерений 
 
 
 // Временные переменные для команды и данных
-unsigned char cmdTmp = 0;
-unsigned char dataTmp = 0;
+uint8_t cmdTmp = 0;
+uint8_t dataTmp = 0;
 
 
 void initIO(void);
@@ -141,11 +141,11 @@ void initTC2(void);
 void initTC0(void);
 void turnOnTC1(void);
 void turnOffTC1(void);
-void sendCmdAndDataToUSART(unsigned char cmd, unsigned char data);
-void sendCmdToUSART(unsigned char cmd);
-void sendDataToUSART(unsigned char data);
-void writeCharToUSART(unsigned char sym);
-unsigned char getCharOfUSART(void);
+void sendCmdAndDataToUSART(uint8_t cmd, uint8_t data);
+void sendCmdToUSART(uint8_t cmd);
+void sendDataToUSART(uint8_t data);
+void writeCharToUSART(uint8_t sym);
+uint8_t getCharOfUSART(void);
 bool checkSMInBeginPos(void);
 void stopSM(void);
 void blinkLed1r(void);
@@ -167,7 +167,7 @@ int main(void){
 
 	ADCSRA |= (1<<ADSC); // запускаем первое АЦП преобразование
 
-	unsigned char sym;
+	uint8_t sym;
 
 	while(1){
 		sym = getCharOfUSART();
@@ -278,9 +278,9 @@ ISR(TIMER0_OVF_vect){
 // Множетель для получения больших значений времени срабатывания.
 // Например при ocr2=195 -> t=25 ms. Соответственно для получения
 // времени срабатывания в 1 s этот множетель = 40.
-const unsigned char kSecFactor = 40;
+const uint8_t kSecFactor = 40;
 // Счетчик множетелья.
-volatile unsigned char kSecCount = 0;
+volatile uint8_t kSecCount = 0;
 // Переключение уровня сигнала с высокого в низкний
 // и наоборот. Соответсвенно полученим меандр.
 volatile bool isSwithOnMeandr = false;
@@ -308,17 +308,17 @@ ISR(TIMER2_COMP_vect){
 // Далее 10 мм делим на 0.2 мм = 50 раз. В 50 раз нужно уменьшить полученное число шагов. 
 // Т.е. 850 делим на 50 = 17 шагов нужно для перемещения червяка на 0.2 мм. 
 // Это приблеженное значение т.к. SM_FULL_ONE_ROTATE_1CM SM_ONEROTATE_360_DEGR требуют калибровки!
-const unsigned char stepAdcSyncConst = 17;
+const uint8_t stepAdcSyncConst = 17;
 
 ISR(TIMER1_OVF_vect){
 	// в каком направлении выполняеться движение ШД
 	// false - прямое ; true - обратное
 	static bool isDisableForward = false;
 	// счетчик состяний обмоток ШД
-	static signed char stepCount = 0;
+	static int8_t stepCount = 0;
 	// счетчик шагов ШД в процессе измерения
-	static int smProgressCount = 0;
-	static unsigned char stepAdcSyncCount = 0;
+	static int16_t smProgressCount = 0;
+	static uint8_t stepAdcSyncCount = 0;
 
 	// прямой ход ШД - выполнение измерений
 	if(smProgressCount < SM_FULL_MSR_STEPS && !isDisableForward){
@@ -329,7 +329,7 @@ ISR(TIMER1_OVF_vect){
 			if (stepCount > 3) stepCount = 0;
 
 			if (stepAdcSyncCount == stepAdcSyncConst){
-				sendCmdAndDataToUSART(startMsrCmd, (unsigned char)(adcResult/4));
+				sendCmdAndDataToUSART(startMsrCmd, (uint8_t)(adcResult/4));
 				stepAdcSyncCount = 0;
 			} else {
 				stepAdcSyncCount ++;
@@ -487,7 +487,7 @@ void turnOffTC1(){
 }
 
 // Отправка в COM порт команды затем данных
-void sendCmdAndDataToUSART(unsigned char cmd, unsigned char data){
+void sendCmdAndDataToUSART(uint8_t cmd, uint8_t data){
 	cmdTmp = cmd;
 	dataTmp = data;
 	runTC0();
@@ -495,7 +495,7 @@ void sendCmdAndDataToUSART(unsigned char cmd, unsigned char data){
 
 // ОТправка в COM порт только команды
 // Данные = 0
-void sendCmdToUSART(unsigned char cmd){
+void sendCmdToUSART(uint8_t cmd){
 	cmdTmp = cmd;
 	dataTmp = 0;
 	runTC0();
@@ -503,21 +503,21 @@ void sendCmdToUSART(unsigned char cmd){
 
 // Отправка в COM порт только данных
 // Команда = 0
-void sendDataToUSART(unsigned char data){
+void sendDataToUSART(uint8_t data){
 	cmdTmp = 0;
 	dataTmp = data;
 	runTC0();
 }
 
 // отправка символа по usart`у
-void writeCharToUSART(unsigned char sym){
+void writeCharToUSART(uint8_t sym){
 	while(!(UCSRA & (1<<UDRE)));
 	UDR = sym;  
 }
 
 // чтение буфера usart
-unsigned char getCharOfUSART(void){
-	unsigned char tmp;
+uint8_t getCharOfUSART(void){
+	uint8_t tmp;
 	ATOMIC_BLOCK(ATOMIC_FORCEON){
 		tmp = usartRxBuf;
 		usartRxBuf = 0;
