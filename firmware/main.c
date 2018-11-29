@@ -18,6 +18,9 @@
 #define		SM_PIN		PIND
 #define		SM_DDR		DDRD
 
+/* Определения номера порта для включения DC-DC преобразователя - ИП для ШД */
+#define		SM_EN	3
+
 /* определения номеров портов к котрым подключены обмотки ШД */
 #define		SM_WIRE_1	4
 #define		SM_WIRE_2	5
@@ -325,7 +328,7 @@ ISR(TIMER1_OVF_vect){
 	if(smProgressCount < SM_FULL_MSR_STEPS && !isDisableForward){
 		if (pcCommand == DO_START_SM){
 
-			SM_PORT = smTableNormalStep[stepCount];
+			SM_PORT = smTableNormalStep[stepCount] | _BV(SM_EN);
 			stepCount ++;
 			if (stepCount > 3) stepCount = 0;
 
@@ -350,7 +353,7 @@ ISR(TIMER1_OVF_vect){
 
 	// обратный ход ШД - возвращение в исходное положение
 	if (smProgressCount > 0 && isDisableForward){
-		SM_PORT = smTableNormalStep[stepCount];
+		SM_PORT = smTableNormalStep[stepCount] | _BV(SM_EN);
 		stepCount --;
 		if (stepCount < 0) stepCount = 3;
 
@@ -375,6 +378,9 @@ ISR(TIMER1_OVF_vect){
 
 /* инициализация портов в/в */
 void initIO(void){
+	/* Настприваем на ВЫХОД порт к которым подклчен ИП для ШД */
+	SetBit(SM_DDR, SM_EN);
+
 	/* Настприваем на ВЫХОД порты к которым подклчен двигатель */
 	SetBit(SM_DDR, SM_WIRE_1);
 	SetBit(SM_DDR, SM_WIRE_2);
@@ -548,7 +554,9 @@ bool checkSMInBeginPos(){
 }
 
 // остановка ШД - снятия напряжения с управляющих выводов
+// отключение ИП для ШД
 void stopSM(){
+	ClearBit(SM_PORT, SM_EN);
 	ClearBit(SM_PORT, SM_WIRE_1);
 	ClearBit(SM_PORT, SM_WIRE_2);
 	ClearBit(SM_PORT, SM_WIRE_3);
