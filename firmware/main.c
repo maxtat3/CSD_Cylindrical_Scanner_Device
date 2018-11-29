@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "bit_macros.h"
 #include "uart.h"
+#include "adc.h"
 
 
 // ==========================================
@@ -98,8 +99,7 @@ volatile bool isBlockTC1 = false;
 volatile bool btnStateFlag = false;
 
 
-volatile uint8_t lowByte; // младший байт ацп преобразования
-volatile uint16_t adcResult; // результат ацп 
+
 
 // таблица шагов ШД , нормальный шаг
 // const char smTableNormalStep[] = {_BV(SM_WIRE_1), _BV(SM_WIRE_2), _BV(SM_WIRE_3), _BV(SM_WIRE_4)};
@@ -131,7 +131,7 @@ const int8_t startMsrCmd = 100; // выполняеться процесс из�
 
 void initIO(void);
 
-void initADC(void);
+
 void initExtInt0(void);
 void initTC2(void);
 // void initTC0(void);	// todo - not used ? 
@@ -155,7 +155,7 @@ int main(void){
 
 	checkSMInBeginPos();
 
-	ADCSRA |= (1<<ADSC); // запускаем первое АЦП преобразование
+	start_cont_conv();
 
 	uint8_t sym;
 
@@ -217,15 +217,6 @@ int main(void){
 
 
 
-// Обработка прерывания от ацп
-ISR(ADC_vect){
-	// считываем младший и старший байты результата АЦ-преобразования и образуем из них 10-разрядный результат
-	lowByte = ADCL;
-	adcResult = (ADCH<<8)|lowByte;
-
-	// запускаем новое АЦ-преобразование
-	ADCSRA |= (1<<ADSC);
-}
 
 // Обработчик кнопка для запуска/остановки процееса измерений
 ISR(INT0_vect){
@@ -299,7 +290,7 @@ ISR(TIMER1_OVF_vect){
 			if (stepCount > 3) stepCount = 0;
 
 			if (stepAdcSyncCount == stepAdcSyncConst){
-				sendCmdAndDataToUSART(startMsrCmd, (uint8_t)(adcResult/4));
+				sendCmdAndDataToUSART(startMsrCmd, (uint8_t)(get_adc_res()/4));
 				stepAdcSyncCount = 0;
 			} else {
 				stepAdcSyncCount ++;
@@ -365,17 +356,6 @@ void initIO(void){
 	sbi(MEANDER_DDR, MEANDER); 
 }
 
-
-
-// настройка АЦП
-void initADC(void){
-	ADCSRA |= (1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0); // предделитель на 128
-	ADCSRA |= (1<<ADIE);                        // разрешаем прерывание от ацп
-	ADCSRA |= (1<<ADEN);                        // разрешаем работу АЦП
-
-	ADMUX |= (1<<REFS0)|(1<<REFS1);             // работа от внутр. ИОН 2,56 В
-	ADMUX|=(0<<MUX3)|(0<<MUX2)|(0<<MUX1)|(0<<MUX0);
-}
 
 // настройка прерывания от внешнего источник (кнопки)
 void initExtInt0(){
