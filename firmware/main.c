@@ -4,6 +4,7 @@
 #include <util/atomic.h>
 #include <stdbool.h>
 #include "bit_macros.h"
+#include "uart.h"
 
 
 // ==========================================
@@ -86,9 +87,8 @@
 #define		SM_DELAY_STEP_MS	5
 
 /* Задержка между данными и командой при отправке в COM порт */
-#define		USART_CMD_OR_DATA_DELAY	2
+// #define		USART_CMD_OR_DATA_DELAY	2	// not used ?
 
-#define 	TC0_TCNT_VAL	153
 
 
 /* Выполнен ли захват ТС1, т.е. включен он (ШД вращаеться) или нет. false - ТС1 свободен (выключен), ШД остановлен; true - ТС1 включен, ШД выполняет вращение */
@@ -97,7 +97,7 @@ volatile bool isBlockTC1 = false;
 // запоминае состояние состояния кнопки запуска/остановки процееса измерений
 volatile bool btnStateFlag = false;
 
-volatile uint8_t usartRxBuf = 0;	//однобайтный буфер
+
 volatile uint8_t lowByte; // младший байт ацп преобразования
 volatile uint16_t adcResult; // результат ацп 
 
@@ -128,30 +128,20 @@ volatile enum fromPcCommands pcCommand = STDBY;
 const int8_t startMsrCmd = 100; // выполняеться процесс измерений 
 
 
-// Временные переменные для команды и данных
-uint8_t cmdTmp = 0;
-uint8_t dataTmp = 0;
-
 
 void initIO(void);
-void initUSART(void);
+
 void initADC(void);
 void initExtInt0(void);
 void initTC2(void);
-void initTC0(void);
+// void initTC0(void);	// todo - not used ? 
 void turnOnTC1(void);
 void turnOffTC1(void);
-void sendCmdAndDataToUSART(uint8_t cmd, uint8_t data);
-void sendCmdToUSART(uint8_t cmd);
-void sendDataToUSART(uint8_t data);
-void writeCharToUSART(uint8_t sym);
-uint8_t getCharOfUSART(void);
+
 bool checkSMInBeginPos(void);
 void stopSM(void);
 void blinkLed1r(void);
 void blinkLed2r(void);
-void runTC0(void);
-void stopTC0(void);
 
 
 int main(void){
@@ -225,10 +215,7 @@ int main(void){
 	}
 }
 
-// Прием символа по usart`у в буфер
-ISR(USART_RXC_vect){ 
-   usartRxBuf = UDR;  
-} 
+
 
 // Обработка прерывания от ацп
 ISR(ADC_vect){
@@ -256,23 +243,6 @@ ISR(INT0_vect){
 }
 
 
-volatile bool isCmd = true;
-
-ISR(TIMER0_OVF_vect){
-	if (isCmd){
-		writeCharToUSART(cmdTmp);
-		cmdTmp = 0;
-		isCmd = false;
-	} else {
-		writeCharToUSART(dataTmp);
-		dataTmp = 0;
-		isCmd = true;
-		stopTC0();
-		return;
-	}
-
-	TCNT0 = TC0_TCNT_VAL;
-}
 
 
 // Множетель для получения больших значений времени срабатывания.
@@ -395,16 +365,6 @@ void initIO(void){
 	sbi(MEANDER_DDR, MEANDER); 
 }
 
-void initUSART(){
-	//UBRR=95 @ 9600 бод при 14,7456 MHz (U2X = 0)
-	//UBRR=51 @ 9600 бод при 8 MHz (U2X = 0)
-	// примерно 60 выб/с для 1 канала ???!!!
-	UBRRH = 0;
-	UBRRL = 51; 
-	
-	UCSRB=(1<<RXCIE)|(1<<RXEN)|(1<<TXEN); //разр. прерыв при приеме, разр приема, разр передачи.
-	UCSRC=(1<<URSEL)|(1<<UCSZ1)|(1<<UCSZ0);  //размер слова 8 разрядов
-}
 
 
 // настройка АЦП
@@ -486,46 +446,6 @@ void turnOffTC1(){
 	sei();
 }
 
-// Отправка в COM порт команды затем данных
-void sendCmdAndDataToUSART(uint8_t cmd, uint8_t data){
-	cmdTmp = cmd;
-	dataTmp = data;
-	runTC0();
-}
-
-// ОТправка в COM порт только команды
-// Данные = 0
-void sendCmdToUSART(uint8_t cmd){
-	cmdTmp = cmd;
-	dataTmp = 0;
-	runTC0();
-}
-
-// Отправка в COM порт только данных
-// Команда = 0
-void sendDataToUSART(uint8_t data){
-	cmdTmp = 0;
-	dataTmp = data;
-	runTC0();
-}
-
-// отправка символа по usart`у
-void writeCharToUSART(uint8_t sym){
-	while(!(UCSRA & (1<<UDRE)));
-	UDR = sym;  
-}
-
-// чтение буфера usart
-uint8_t getCharOfUSART(void){
-	uint8_t tmp;
-	ATOMIC_BLOCK(ATOMIC_FORCEON){
-		tmp = usartRxBuf;
-		usartRxBuf = 0;
-	}
-	return tmp;  
-}
-
-
 
 // Проверка расположения (парковки) ШД в исходном (начальном) положении 
 // Обратный ход ШД до закрытия окна опто-прерывателя
@@ -573,26 +493,4 @@ void blinkLed2r(){
 	sbi(STATE_LED_PORT, STATE_LED);
 	_delay_ms(30);
 	cbi(STATE_LED_PORT, STATE_LED);
-}
-
-// Запуска ТС0 в прерывании которого 
-// выполняеться отправка Байта команды и данных по UART.
-void runTC0(){
-	sbi(TIMSK, TOIE0);
-
-	TCNT0 = TC0_TCNT_VAL;
-
-	//делитель 1024
-	sbi(TCCR0, 	CS00);
-	cbi(TCCR0,	CS01);
-	sbi(TCCR0,	CS02);
-}
-
-// Остановка ТС0. После отправки Байта команды и 
-// данных по UART таймер должен вызвать этот метод , тем самым
-// сам остановвиться.
-void stopTC0(){
-	cbi(TCCR0,	CS00);
-	cbi(TCCR0,	CS01);
-	cbi(TCCR0,	CS02);
 }
