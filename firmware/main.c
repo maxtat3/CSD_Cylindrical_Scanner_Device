@@ -6,6 +6,7 @@
 #include "bit_macros.h"
 #include "uart.h"
 #include "adc.h"
+#include "indication.h"
 
 
 // ==========================================
@@ -37,15 +38,6 @@
 /* Номер порта к которому подключен опто-прерыватель*/
 #define		OPTO_SENSOR		0
 
-// ==========================================
-// 			Led1 для логгирования
-// ==========================================
-/* определения регистров для logging led1 */
-#define		STATE_LED_PORT		PORTB
-#define		STATE_LED_DDR		DDRB
-
-/* определения номера портв к которым подключен logging led1 */
-#define 	STATE_LED 		1
 
 // ==========================================
 //			Вывод генерации меандра
@@ -140,8 +132,6 @@ void turnOffTC1(void);
 
 bool checkSMInBeginPos(void);
 void stopSM(void);
-void blinkLed1r(void);
-void blinkLed2r(void);
 
 
 int main(void){
@@ -151,6 +141,7 @@ int main(void){
 	initADC();
 	initExtInt0();
 	initTC2();
+	init_ind_led_msr();
 	sei();
 
 	checkSMInBeginPos();
@@ -284,6 +275,7 @@ ISR(TIMER1_OVF_vect){
 	// прямой ход ШД - выполнение измерений
 	if(smProgressCount < SM_FULL_MSR_STEPS && !isDisableForward){
 		if (pcCommand == DO_START_SM){
+			ind_led_msr_state(true, false, 0);
 
 			SM_PORT = smTableNormalStep[stepCount] | _BV(SM_EN);
 			stepCount ++;
@@ -315,6 +307,8 @@ ISR(TIMER1_OVF_vect){
 		if (stepCount < 0) stepCount = 3;
 
 		smProgressCount --;
+
+		ind_led_msr_state(true, true, LED_BLINK_MEDIUM);
 	}
 
 	// останока ШД
@@ -323,6 +317,7 @@ ISR(TIMER1_OVF_vect){
 		stepCount = 0;
 		smProgressCount = 0;
 		turnOffTC1();
+		ind_led_msr_state(false, false, 0);
 	}
 
 	if (!isDisableForward){
@@ -348,9 +343,6 @@ void initIO(void){
 
 	/* Настриваем на ВХОД порт для подключения опто-прерывателя */
 	cbi(OPTO_SENSOR_DDR, OPTO_SENSOR);
-	
-	/* Настриваем на ВЫХОД порт для подключения state led  */
-	sbi(STATE_LED_DDR, STATE_LED);
 
 	/* Настриваем на ВЫХОД порт для меандра  */
 	sbi(MEANDER_DDR, MEANDER); 
@@ -457,20 +449,4 @@ void stopSM(){
 	cbi(SM_PORT, SM_WIRE_2);
 	cbi(SM_PORT, SM_WIRE_3);
 	cbi(SM_PORT, SM_WIRE_4);
-}
-
-void blinkLed1r(){
-	sbi(STATE_LED_PORT, STATE_LED);
-	_delay_ms(100);
-	cbi(STATE_LED_PORT, STATE_LED);
-}
-
-void blinkLed2r(){
-	sbi(STATE_LED_PORT, STATE_LED);
-	_delay_ms(30);
-	cbi(STATE_LED_PORT, STATE_LED);
-	_delay_ms(30);
-	sbi(STATE_LED_PORT, STATE_LED);
-	_delay_ms(30);
-	cbi(STATE_LED_PORT, STATE_LED);
 }
