@@ -1,9 +1,6 @@
-// #include <avr/io.h>
-// #include <stdbool.h>
-
 #include "indication.h"
 
-
+// Counter for  call ind_led_msr_state function.
 static uint8_t curr_blink_intv = 0;
 
 
