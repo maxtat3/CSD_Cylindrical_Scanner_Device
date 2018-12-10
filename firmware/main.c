@@ -7,6 +7,7 @@
 #include "uart.h"
 #include "adc.h"
 #include "indication.h"
+#include "opto_interrupter.h"
 
 
 // ==========================================
@@ -25,19 +26,6 @@
 #define		SM_WIRE_2	5
 #define		SM_WIRE_3	6
 #define		SM_WIRE_4	7
-
-// ==========================================
-// 			Опто-прерыватель с открытым каналом 
-// 			Датчик остановки шагового двигателя
-// ==========================================
-/* Определение регистров порта к которму подключен опто-прерыватель */
-#define		OPTO_SENSOR_PORT	PORTB
-#define		OPTO_SENSOR_DDR		DDRB
-#define		OPTO_SENSOR_PIN		PINB
-
-/* Номер порта к которому подключен опто-прерыватель*/
-#define		OPTO_SENSOR		0
-
 
 // ==========================================
 //			Вывод генерации меандра
@@ -140,8 +128,9 @@ int main(void){
 	initUSART();
 	initADC();
 	initExtInt0();
-	initTC2();
+	// initTC2();
 	init_ind_led_msr();
+	init_opto_interrupter();
 	sei();
 
 	checkSMInBeginPos();
@@ -341,11 +330,8 @@ void initIO(void){
 
 	stopSM();
 
-	/* Настриваем на ВХОД порт для подключения опто-прерывателя */
-	cbi(OPTO_SENSOR_DDR, OPTO_SENSOR);
-
 	/* Настриваем на ВЫХОД порт для меандра  */
-	sbi(MEANDER_DDR, MEANDER); 
+	// sbi(MEANDER_DDR, MEANDER); 
 }
 
 
@@ -423,20 +409,18 @@ void turnOffTC1(){
 // Обратный ход ШД до закрытия окна опто-прерывателя
 bool checkSMInBeginPos(){
 	cli();
-	while (iscbi(OPTO_SENSOR_PIN, OPTO_SENSOR)){
-		SM_PORT = smTableNormalStep[3];
-		_delay_ms(SM_DELAY_STEP_MS);
-	
-		SM_PORT = smTableNormalStep[2];
-		_delay_ms(SM_DELAY_STEP_MS);
-		
-		SM_PORT = smTableNormalStep[1];
-		_delay_ms(SM_DELAY_STEP_MS);
-		
-		SM_PORT = smTableNormalStep[0];
-		_delay_ms(SM_DELAY_STEP_MS);
+
+	while (opto_intrpt_is_closed()){
+		for (int8_t i = 3; i >= 0; --i){
+			SM_PORT = smTableNormalStep[i] | _BV(SM_EN);
+			_delay_ms(SM_DELAY_STEP_MS);
+			ind_led_msr_state(true, true, LED_BLINK_MEDIUM);
+			if (opto_intrpt_is_closed()) continue;
+		}
 	}
+
 	stopSM();
+	ind_led_msr_state(false, false, 0);
 	sei();
 	return true;
 }
