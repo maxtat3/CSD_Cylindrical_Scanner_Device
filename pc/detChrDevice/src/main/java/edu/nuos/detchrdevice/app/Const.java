@@ -24,8 +24,19 @@ public class Const {
 	 */
 	public static final int MAX_AMOUNT_POINTS_ON_CHART = 300;
 
-	public static final String BTN_LABEL_START = "start";
-	public static final String BTN_LABEL_STOP = "stop";
+	/**
+	 * Размер по умолчанию для GUI элементов.
+	 */
+	public static final int DEFAULT_SIZE_UI_EL = 16;
+
+	/**
+	 * Шрифт по умолчанию для GUI элементов.
+	 */
+	public static final String DEFAULT_FONT_UI_EL = "Tahoma";
+
+	public static final String BTN_LABEL_START = "Старт";
+	public static final String BTN_LABEL_STOP = "Стоп";
+
 	/**
 	 * Команда запуска измерений;
 	 * Последовательность действия команды PC -> MCU

@@ -44,14 +44,19 @@ public class UI {
 		jpChart.setLayout(new BoxLayout(jpChart, BoxLayout.Y_AXIS));
 
 		btnRunMsr = new JButton(Const.BTN_LABEL_START);
+		btnRunMsr.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
 
 		jcmboxComPort = new JComboBox();
-		jcmboxComPort.setMaximumSize(new Dimension(135, Short.MAX_VALUE));
+		jcmboxComPort.setMaximumSize(new Dimension(155, Short.MAX_VALUE));
 		jcmboxComPort.setModel(new DefaultComboBoxModel(Const.COM_PORTS));
+		jcmboxComPort.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
 
 		jchbRecordData = new JCheckBox();
-		jchbRecordData.setText("Record data ?");
-		jchbRecordData.setMaximumSize(new Dimension(135, Short.MAX_VALUE));
+		jchbRecordData.setText("Запись данных ?");
+		jchbRecordData.setToolTipText("Данные сохраняются в том же каталоге из которого запущено приложение");
+		UIManager.put("ToolTip.background", new Color(240, 240, 240));
+		jchbRecordData.setMaximumSize(new Dimension(190, Short.MAX_VALUE));
+		jchbRecordData.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
 
 		buildChartUI();
 
