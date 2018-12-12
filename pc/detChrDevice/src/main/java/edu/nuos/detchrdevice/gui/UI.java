@@ -48,13 +48,15 @@ public class UI {
 
 		jcmboxComPort = new JComboBox();
 		jcmboxComPort.setMaximumSize(new Dimension(155, Short.MAX_VALUE));
+		jcmboxComPort.setToolTipText("Выбор COM порта для подключения к устройству");
+		UIManager.put(Const.PROP_TOOLTIP, Const.COLOR_TOOLTIP_BACKGR);
 		jcmboxComPort.setModel(new DefaultComboBoxModel(Const.COM_PORTS));
 		jcmboxComPort.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
 
 		jchbRecordData = new JCheckBox();
 		jchbRecordData.setText("Запись данных ?");
 		jchbRecordData.setToolTipText("Данные сохраняются в том же каталоге из которого запущено приложение");
-		UIManager.put("ToolTip.background", new Color(240, 240, 240));
+		UIManager.put(Const.PROP_TOOLTIP, Const.COLOR_TOOLTIP_BACKGR);
 		jchbRecordData.setMaximumSize(new Dimension(190, Short.MAX_VALUE));
 		jchbRecordData.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
 
@@ -63,7 +65,9 @@ public class UI {
 		JPanel jpDir = new JPanel();
 		jpDir.setLayout(new BoxLayout(jpDir, BoxLayout.X_AXIS));
 		jpDir.add(btnRunMsr);
+		jpDir.add(Box.createHorizontalStrut(12));
 		jpDir.add(jcmboxComPort);
+		jpDir.add(Box.createHorizontalStrut(12));
 		jpDir.add(jchbRecordData);
 		jpChart.add(chart);
 
