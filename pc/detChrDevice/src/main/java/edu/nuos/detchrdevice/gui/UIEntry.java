@@ -102,6 +102,18 @@ public class UIEntry implements UART.CallbackADCData{
 				}
 			}
 		});
+
+		ui.getJchbRecordData().addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (ui.getJchbRecordData().isSelected()) {
+					ui.getJchbRecordData().setBackground(Color.ORANGE);
+				} else {
+					ui.getJchbRecordData().setBackground(new JCheckBox().getBackground());
+				}
+
+			}
+		});
 	}
 
 	/**
