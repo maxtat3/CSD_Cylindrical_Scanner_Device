@@ -66,7 +66,7 @@ public class Const {
 	/**
 	 * Масштабирование оси Y - максимальное значение.
 	 */
-	public static final int Y_AXIS_MAX_VAL = 400;
+	public static final int Y_AXIS_MAX_VAL = 100;
 
 	/**
 	 * Цвет фона на графике
@@ -97,7 +97,7 @@ public class Const {
 	/**
 	 * Подпись оси Y
 	 */
-	public static final String TITLE_Y_AXIS = "Напряжение (мВ)";
+	public static final String TITLE_Y_AXIS = "Освещенность образца (%)";
 
 
 

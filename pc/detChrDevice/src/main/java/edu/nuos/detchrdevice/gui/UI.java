@@ -112,6 +112,8 @@ public class UI {
 		axisY.setPaintGrid(true);
 		axisY.setAxisTitle(new IAxis.AxisTitle(Const.TITLE_Y_AXIS));
 		axisY.getAxisTitle().setTitleColor(Const.COLOR_CHART_MAIN);
+		axisY.setMinorTickSpacing(5);
+		axisY.setMajorTickSpacing(10);
 		IRangePolicy rangePolicy = new RangePolicyFixedViewport(new Range(Const.Y_AXIS_MIN_VAL, Const.Y_AXIS_MAX_VAL));
 		chart.getAxisY().setRangePolicy(rangePolicy);
 	}
