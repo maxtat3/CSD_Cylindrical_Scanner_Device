@@ -7,6 +7,7 @@ import java.awt.*;
  */
 public class Const {
 
+	/* =========== Интерфейсная часть =========== */
 	/**
 	 * Имена com портов, по одному из которых можно выполнить подключение к установке
 	 */
@@ -16,38 +17,6 @@ public class Const {
 			"/dev/ttyACM1", "/dev/ttyACM2", "/dev/ttyACM3", "/dev/ttyACM0",
 			"/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3"
 	};
-
-	/**
-	 * Размер буфера для отображения количества точек на одном экране графика.
-	 * При превышении этого количества, функция на графие начинает смещаться влево, таким образом
-	 * чтобы на графике всегда помещалось указанное количество точек.
-	 */
-	public static final int MAX_AMOUNT_POINTS_ON_CHART = 300;
-
-	/**
-	 * Размер по умолчанию для GUI элементов.
-	 */
-	public static final int DEFAULT_SIZE_UI_EL = 16;
-
-	/**
-	 * Шрифт по умолчанию для GUI элементов.
-	 */
-	public static final String DEFAULT_FONT_UI_EL = "Tahoma";
-
-	public static final String BTN_LABEL_START = "Старт";
-	public static final String BTN_LABEL_STOP = "Стоп";
-
-	/**
-	 * Быстрая клавиша для запуска/остановки измерения.
-	 * Для выполнений действия [ALT] + [hot key]
-	 */
-	public static final char HOT_KEY_START_STOP = 'C';	// На раскладке Кириллицы символ [C] (Старт/стоп)
-
-	/**
-	 * Быстрая клавиша для выполнения записи.
-	 * Для выполнений действия [ALT] + [hot key]
-	 */
-	public static final char HOT_KEY_RECORD = 'P'; // На раскладке Кириллицы символ [З] (Запись)
 
 	/**
 	 * Команда запуска измерений;
@@ -73,11 +42,21 @@ public class Const {
 	public static final char[] RESPONSE_INIT_DEVICE = {'F', 'G', 'H'};
 
 	/**
-	 * Разрядность АЦП при передаче данных.
+	 * Разрядность АЦП при приеме данных от MCU.
 	 * Указываеться макс. значение для соотв. разрядной сетки.
 	 * Например для ацп: 8 бит -> 255 ; 10 бит -> 1023 и т.д.
 	 */
 	public static final int ADC_SAMPLE_RATE_IN_BITS = 255;
+
+
+
+	/* =========== График =========== */
+	/**
+	 * Размер буфера для отображения количества точек на одном экране графика.
+	 * При превышении этого количества, функция на графие начинает смещаться влево, таким образом
+	 * чтобы на графике всегда помещалось указанное количество точек.
+	 */
+	public static final int MAX_AMOUNT_POINTS_ON_CHART = 300;
 
 	/**
 	 * Масштабирование оси Y - минимальное значение.
@@ -111,6 +90,44 @@ public class Const {
 	public static final Color COLOR_CHART_AXIS_TITLE = new Color(26, 165, 165);
 
 	/**
+	 * Подпись оси X
+	 */
+	public static final String TITLE_X_AXIS = "Длина образца (мм)";
+
+	/**
+	 * Подпись оси Y
+	 */
+	public static final String TITLE_Y_AXIS = "Напряжение (мВ)";
+
+
+
+	/* =========== Элементы управления =========== */
+	/**
+	 * Размер по умолчанию для GUI элементов.
+	 */
+	public static final int DEFAULT_SIZE_UI_EL = 16;
+
+	/**
+	 * Шрифт по умолчанию для GUI элементов.
+	 */
+	public static final String DEFAULT_FONT_UI_EL = "Tahoma";
+
+	public static final String BTN_LABEL_START = "Старт";
+	public static final String BTN_LABEL_STOP = "Стоп";
+
+	/**
+	 * Быстрая клавиша для запуска/остановки измерения.
+	 * Для выполнений действия [ALT] + [hot key]
+	 */
+	public static final char HOT_KEY_START_STOP = 'C';	// На раскладке Кириллицы символ [C] (Старт/стоп)
+
+	/**
+	 * Быстрая клавиша для выполнения записи.
+	 * Для выполнений действия [ALT] + [hot key]
+	 */
+	public static final char HOT_KEY_RECORD = 'P'; // На раскладке Кириллицы символ [З] (Запись)
+
+	/**
 	 * Цвет фона в подсказках для UI элементов
 	 */
 	public static final Color COLOR_TOOLTIP_BACKGR = new Color(240, 240, 240);
@@ -120,13 +137,4 @@ public class Const {
 	 */
 	public static final String PROP_TOOLTIP = "ToolTip.background";
 
-	/**
-	 * Подпись оси X
-	 */
-	public static final String TITLE_X_AXIS = "Длина образца (мм)";
-
-	/**
-	 * Подпись оси Y
-	 */
-	public static final String TITLE_Y_AXIS = "Напряжение (мВ)";
 }
