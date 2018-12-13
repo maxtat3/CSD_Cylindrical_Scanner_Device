@@ -9,8 +9,20 @@ repositories {
     mavenCentral()
 }
 
+ext.jarName = "CSD"
+ext.versionMajor = 1
+ext.versionMinor = 2
+/**
+ * Is app release or release-candidate.
+ *
+ * true - nothing is added at the end of jar file
+ * false - added -rc at the end jar
+ */
+ext.isRelease = false
+
+
 jar {
-    archiveName = "DetermChromeDevice.jar"
+    archiveName = generateJarName()
     from {
         configurations.runtime.collect {
             it.isDirectory() ? it : zipTree(it)
@@ -23,6 +35,15 @@ jar {
         attributes 'Main-Class': 'edu.nuos.detchrdevice.app.App'
     }
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+}
+
+private String generateJarName() {
+    String name = "${ext.jarName}_v${ext.versionMajor}.${ext.versionMinor}"
+    if (!ext.isRelease) {
+        name += "-rc"
+    }
+    name += ".jar"
+    return name;
 }
 
 dependencies {
