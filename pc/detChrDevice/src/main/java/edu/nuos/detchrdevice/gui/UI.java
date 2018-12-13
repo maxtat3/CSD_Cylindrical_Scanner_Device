@@ -75,7 +75,8 @@ public class UI {
 		jpDir.add(jchbRecordData);
 		jpChart.add(chart);
 
-		mainFrame = new JFrame();
+		mainFrame = new JFrame("Установка исследования процессов при активации поверхностей " +
+			"при диффузионной сварке и пайке в вакууме");
 		mainFrame.getContentPane().setLayout(new BorderLayout());
 		mainFrame.add(jpDir, BorderLayout.NORTH);
 		mainFrame.add(jpChart, BorderLayout.CENTER);
