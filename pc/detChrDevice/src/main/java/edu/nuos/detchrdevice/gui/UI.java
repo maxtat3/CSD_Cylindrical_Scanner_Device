@@ -44,7 +44,7 @@ public class UI {
 		jpChart.setLayout(new BoxLayout(jpChart, BoxLayout.Y_AXIS));
 
 		btnRunMsr = new JButton(Const.BTN_LABEL_START);
-		btnRunMsr.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
+		btnRunMsr.setFont(Const.DEFAULT_FONT);
 		btnRunMsr.setMnemonic(Const.HOT_KEY_START_STOP);
 		btnRunMsr.setToolTipText("Запуск/остановка измерений [ALT + "+Const.HOT_KEY_START_STOP+"]");
 
@@ -53,7 +53,7 @@ public class UI {
 		jcmboxComPort.setToolTipText("Выбор COM порта для подключения к устройству");
 		UIManager.put(Const.PROP_TOOLTIP, Const.COLOR_TOOLTIP_BACKGR);
 		jcmboxComPort.setModel(new DefaultComboBoxModel(Const.COM_PORTS));
-		jcmboxComPort.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
+		jcmboxComPort.setFont(Const.DEFAULT_FONT);
 
 		jchbRecordData = new JCheckBox();
 		jchbRecordData.setText("Запись данных ?");
@@ -61,7 +61,7 @@ public class UI {
 			"из которого запущено приложение [ALT + "+Const.HOT_KEY_RECORD+"]");
 		UIManager.put(Const.PROP_TOOLTIP, Const.COLOR_TOOLTIP_BACKGR);
 		jchbRecordData.setMaximumSize(new Dimension(190, Short.MAX_VALUE));
-		jchbRecordData.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
+		jchbRecordData.setFont(Const.DEFAULT_FONT);
 		jchbRecordData.setMnemonic(Const.HOT_KEY_RECORD);
 
 		buildChartUI();
