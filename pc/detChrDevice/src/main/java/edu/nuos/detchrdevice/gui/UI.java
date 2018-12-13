@@ -45,6 +45,7 @@ public class UI {
 
 		btnRunMsr = new JButton(Const.BTN_LABEL_START);
 		btnRunMsr.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
+		btnRunMsr.setMnemonic(Const.HOT_KEY_START_STOP);
 
 		jcmboxComPort = new JComboBox();
 		jcmboxComPort.setMaximumSize(new Dimension(155, Short.MAX_VALUE));
@@ -59,6 +60,7 @@ public class UI {
 		UIManager.put(Const.PROP_TOOLTIP, Const.COLOR_TOOLTIP_BACKGR);
 		jchbRecordData.setMaximumSize(new Dimension(190, Short.MAX_VALUE));
 		jchbRecordData.setFont(new Font(Const.DEFAULT_FONT_UI_EL, Font.BOLD, Const.DEFAULT_SIZE_UI_EL));
+		jchbRecordData.setMnemonic(Const.HOT_KEY_RECORD);
 
 		buildChartUI();
 
