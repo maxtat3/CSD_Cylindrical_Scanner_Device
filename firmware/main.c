@@ -116,7 +116,7 @@ int main(void){
 	initIO();
 	initUSART();
 	initADC();
-	initExtInt0();
+	// initExtInt0();
 	// initTC2();
 	init_ind_led_msr();
 	init_opto_interrupter();
@@ -152,6 +152,7 @@ int main(void){
 				pcCommand = DO_START_SM;
 				commCount = 0;
 			}
+
 		} else if (sym == pcToMcuStopMeasureComm[commCount]){
 			commCount ++;
 			if (commCount == sizeof(pcToMcuStopMeasureComm)){
