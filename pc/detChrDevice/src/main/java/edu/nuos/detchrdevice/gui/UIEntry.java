@@ -124,33 +124,19 @@ public class UIEntry implements UART.CallbackADCData{
 		// запуск
 		if (!isStartMsrFlag) {
 			resetPreviousMsr();
-			execCmd(Const.CMD_START_MSR);
+			uart.writeRqPck(new int[]{Const.CMD_MAKING_MSR, 0, 0, 0});
 			isStartMsrFlag = true;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_STOP);
 
 		// остановка
 		} else {
-			execCmd(Const.CMD_STOP_MSR);
+			uart.writeRqPck(new int[]{Const.CMD_STOP_MSR, 0, 0, 0});
 			saveRecordData();
 			isStartMsrFlag = false;
 			ui.getBtnRunMsr().setText(Const.BTN_LABEL_START);
 		}
 	}
 
-	/**
-	 * Запрос устройству на выполнение команды.
-	 * @param cmdWord команда
-	 */
-	private void execCmd(String[] cmdWord) {
-		try {
-			for (String cmd : cmdWord) {
-				uart.getSerialPort().writeString(cmd);
-				Thread.sleep(75);
-			}
-		} catch (SerialPortException | InterruptedException e1) {
-			e1.printStackTrace();
-		}
-	}
 
 	/**
 	 * Сброс данных предыдущего измерения из графика

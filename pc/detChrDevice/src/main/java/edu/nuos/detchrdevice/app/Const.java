@@ -19,27 +19,37 @@ public class Const {
 	};
 
 	/**
+	 * Размер буфера в Байтах для передачи на сервер.
+	 */
+	public static final int TX_BUFF_SIZE = 4;
+
+	/**
+	 * Размер буфера в Байтах для приема от сервера.
+	 */
+	public static final int RX_BUFF_SIZE = 4;
+
+	/**
 	 * Команда запуска измерений;
 	 * Последовательность действия команды PC -> MCU
 	 */
-	public static final String [] CMD_START_MSR = {"a", "q", "l"};
+	public static final int CMD_MAKING_MSR = 1;
 
 	/**
 	 * Команда остановки измерений;
 	 * Последовательность действия команды PC -> MCU
 	 */
-	public static final String [] CMD_STOP_MSR = {"a", "b", "k"};
+	public static final int CMD_STOP_MSR = 2;
 
 	/**
-	 * Запрос инициализации устройства. Приложение посылает устройству эту строку.
+	 * Команда запрос инициализации устройства.
 	 */
-	public static final String[] REQUEST_INIT_DEVICE = {"a", "g", "d"};
+	public static final int CMD_INIT_DEVICE = 5;
 
 	/**
 	 * Ответ инициализации устройства. Устройство возвращает эту строку если
-	 * запрос иницализации {@link #REQUEST_INIT_DEVICE} прошел успешно.
+	 * запрос иницализации {@link #CMD_INIT_DEVICE} прошел успешно.
 	 */
-	public static final char[] RESPONSE_INIT_DEVICE = {'F', 'G', 'H'};
+	public static final char[] RESPONSE_INIT_DEVICE = {'C', 'S', 'D'};
 
 	/**
 	 * Разрядность АЦП при приеме данных от MCU.

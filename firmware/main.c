@@ -74,14 +74,26 @@ volatile bool btnStateFlag = false;
 // const char smTableNormalStep[] = {_BV(SM_WIRE_1), _BV(SM_WIRE_2), _BV(SM_WIRE_3), _BV(SM_WIRE_4)};
 const int8_t smTableNormalStep[] = {_BV(SM_WIRE_4), _BV(SM_WIRE_3), _BV(SM_WIRE_2), _BV(SM_WIRE_1)};
 
-//======================================
-//	Команды от ПК
-//	Каждая команда - массив символов
-//======================================
-int8_t pcToMcuStartMeasureComm[] = {'a', 'q', 'l'};
-int8_t pcToMcuStopMeasureComm[] = {'a', 'b', 'k'};
-int8_t pcToMcuInitDevice[] = {'a', 'g', 'd'};
-int16_t commCount = 0; //общий счетчик для определения совпадения команды посимвольно 
+
+
+/* Command codes */
+/** Запуск измерений **/
+#define		CMD_MAKING_MSR		1
+
+/** Остановка измерений **/
+#define		CMD_STOP_MSR		2
+
+/** Выполняетс парковка в начальное положение **/
+#define 	CMD_MAKING_PARKING	3
+
+/** Парковка в начальное положение закончена **/
+#define 	CMD_STOP_PARKING	4
+
+/** Идентефикация этого устройства на выбранном COM порту **/
+#define 	CMD_INIT_DEVICE		5
+const char DATA_RIGHT_INIT_DEVICE[] = {'C', 'S', 'D'};
+
+
 /* Перечислегние команд от ПК */
 enum fromPcCommands{
 	STDBY,
@@ -90,13 +102,23 @@ enum fromPcCommands{
 };
 volatile enum fromPcCommands pcCommand = STDBY;
 
-//======================================
-//	Команды мк -> ПК
-//	Каждая команда занимает только 1 Байт
-//======================================
-const int8_t startMsrCmd = 100; // выполняеться процесс измерений 
 
 
+static uint8_t rxBuff[RX_BUFF_SIZE];
+static uint8_t cmd = 0;
+static uint32_t data = 0;
+
+static uint8_t txPckBuff[TX_BUFF_SIZE];
+
+
+/** Формирование RSP пакта с 1-м Байтом данных для отправки на сервер **/
+void codingRspPck8(uint8_t data, uint8_t cmd);
+
+/** Формирование RSP пакта с 2-я Байтами данных для отправки на сервер **/
+void codingRspPck16(uint16_t data, uint8_t cmd);
+
+/** Формирование RSP пакта с 3-я Байтами данных для отправки на сервер **/
+void codingRspPck32(uint32_t data, uint8_t cmd);
 
 void initIO(void);
 
@@ -126,45 +148,29 @@ int main(void){
 
 	start_cont_conv();
 
-	uint8_t sym;
 
 	while(1){
-		sym = getCharOfUSART();
-		
-		//=====================================
-		//	Блоки проверки соответствия команд от ПК
-		//=====================================
-		if (sym == pcToMcuInitDevice[commCount]){
-			commCount ++;
-			if (commCount == sizeof(pcToMcuInitDevice)){
-				sendDataToUSART('F'); //ascii = 70
-				_delay_ms(35);
-				sendDataToUSART('G'); //ascii = 71
-				_delay_ms(35);
-				sendDataToUSART('H'); //ascii = 72
-				_delay_ms(35);
-				commCount = 0;
-			}
-		} else 
-		if (sym == pcToMcuStartMeasureComm[commCount]){
-			commCount ++;
-			if (commCount == sizeof(pcToMcuStartMeasureComm)){
-				pcCommand = DO_START_SM;
-				commCount = 0;
-			}
+		getPckOfUART(rxBuff);
 
-		} else if (sym == pcToMcuStopMeasureComm[commCount]){
-			commCount ++;
-			if (commCount == sizeof(pcToMcuStopMeasureComm)){
-				pcCommand = DO_STOP_SM;
-				commCount = 0;
+		cmd = (uint8_t)rxBuff[0] & 0xFF;
+
+		if (cmd == CMD_INIT_DEVICE){
+			uint8_t rsp[TX_BUFF_SIZE];
+			rsp[0] = CMD_INIT_DEVICE;
+			for (uint8_t i = 1; i < TX_BUFF_SIZE; ++i){
+				rsp[i] = DATA_RIGHT_INIT_DEVICE[i-1];
 			}
+			sendPckToUART(rsp);
+
+		} else if (cmd == CMD_MAKING_MSR){
+			pcCommand = DO_START_SM;
+
+		} else if(cmd == CMD_STOP_MSR){
+			pcCommand = DO_STOP_SM;
+
 		}
 
-		//=========================================
-		//	Блоки выполнения методов в зависимости
-		//	от полученной команды от ПК
-		//=========================================
+
 		switch(pcCommand){
 			case STDBY:
 				break;
@@ -234,7 +240,8 @@ ISR(TIMER1_OVF_vect){
 			if (stepCount > 3) stepCount = 0;
 
 			if (stepAdcSyncCount == stepAdcSyncConst){
-				sendCmdAndDataToUSART(startMsrCmd, (uint8_t)(get_adc_res()/4));
+				codingRspPck8((uint8_t)(get_adc_res()/4), CMD_MAKING_MSR);
+				sendPckToUART(txPckBuff);
 				stepAdcSyncCount = 0;
 			} else {
 				stepAdcSyncCount ++;
@@ -277,6 +284,29 @@ ISR(TIMER1_OVF_vect){
 	} else {
 		TCNT1 = TCNT1_SM_REVERSE_MOVE;
 	}
+}
+
+
+
+void codingRspPck8(uint8_t data, uint8_t cmd) {
+	*(txPckBuff) = cmd & 0xFF;
+	*(txPckBuff+1) = data & 0xFF;
+	*(txPckBuff+2) = 0;
+	*(txPckBuff+3) = 0;
+}
+
+void codingRspPck16(uint16_t data, uint8_t cmd) {
+	*(txPckBuff) = cmd & 0xFF;
+	*(txPckBuff+1) = data & 0xFF;
+	*(txPckBuff+2) = (data >> 8) & 0xFF;
+	*(txPckBuff+3) = 0;
+}
+
+void codingRspPck32(uint32_t data, uint8_t cmd) {
+	*(txPckBuff) = cmd & 0xFF;
+	*(txPckBuff+1) = data & 0xFF;
+	*(txPckBuff+2) = (data >> 8) & 0xFF;
+	*(txPckBuff+3) = (data >> 16) & 0xFF;
 }
 
 

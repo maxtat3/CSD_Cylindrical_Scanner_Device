@@ -29,13 +29,14 @@ public class UART {
 	private boolean isDeviceFound = false;
 
 	/**
-	 * Счетчик правильно полученных символов одной команды от устройства.
-	 * Команда состоит из нескольких символов.  Тут работет принцип транзакции.
-	 * Если все символы одной команды совпадают - команда
-	 * считаеться выполненной. Этот счетчик
-	 * применен для определения команды иницализации.
+	 * Счетчик правильно полученных символов в секции данных при инициализации устройства .
+	 * Если все символы совпадают - это устройство инициализировано.
+	 * Если же нет - на открытом COM порту другое устройство.
 	 */
 	private int responseCount = 0;
+
+	// Принятые команда и данные от сервера.
+	private int cmd, data;
 
 
 
@@ -127,43 +128,31 @@ public class UART {
 					} else {
 						tryInitDeviceResponse();
 					}
-//					System.out.println("@ rx = " + rxDataBuff[0]);
 				}
 			}
 		}
 	}
 
-	/**
-	 * Переменная которая хранит состояние считываемого значения.
-	 * То есть это команда или данные.
-	 *
-	 * При приеме последовательности Байты команды и данных чередуються.
-	 * Первый Байт - команда, далее данные.
-	 * true - команда , false - данные.
-	 */
-	private boolean isCmd = true;
 
-
-	private int cmd;
 	/**
-	 * Расшифровует поток байт на команды и данные.
+	 * Расшифровует принятый пакет на команды и данные.
 	 */
 	private void decoder() {
 		try {
-			rxDataBuff = serialPort.readIntArray();
-			if (rxDataBuff == null) return;
+			rxDataBuff = serialPort.readIntArray(Const.RX_BUFF_SIZE);
 
-			// команда
-			if (isCmd) {
-				cmd = rxDataBuff[0];
-				System.out.println("cmd = " + cmd);
-				isCmd = false;
-			} else { // данные
-				if (cmd == 100) {
-					System.out.println("data = " + rxDataBuff[0]);
-					callbackADCData.addAdcVal(rxDataBuff[0]);
-				}
-				isCmd = true;
+			cmd = (rxDataBuff[0] & 0xFF);
+
+			switch (cmd) {
+				case Const.CMD_MAKING_MSR:
+					data = rxDataBuff[1] & 0xFF;
+					callbackADCData.addAdcVal(data);
+//					System.out.println("making msr, data=" + data);
+					break;
+
+				case Const.CMD_STOP_MSR:
+					System.out.println("stop msr");
+					break;
 			}
 
 		} catch (SerialPortException e) {
@@ -177,11 +166,8 @@ public class UART {
 	 */
 	private void tryInitDeviceRequest() {
 		try {
-			for (String rq : Const.REQUEST_INIT_DEVICE) {
-				serialPort.writeString(rq);
-				Thread.sleep(75);
-			}
-		} catch (SerialPortException | InterruptedException e) {
+			serialPort.writeIntArray(new int[]{Const.CMD_INIT_DEVICE, 0, 0, 0});
+		} catch (SerialPortException e) {
 			e.printStackTrace();
 		}
 	}
@@ -192,37 +178,43 @@ public class UART {
 	 */
 	private void tryInitDeviceResponse() {
 		try {
-			rxDataBuff = serialPort.readIntArray();
-			System.out.println(">>> response data = " + rxDataBuff[0]);
+			rxDataBuff = serialPort.readIntArray(Const.RX_BUFF_SIZE);
+			boolean rightInitCmd = false;
+
+			System.out.println("RX arr:");
+			for (int rxCh : rxDataBuff) {
+				System.out.println("rxCh = " + rxCh);
+
+				if (rxCh == Const.CMD_INIT_DEVICE) {
+					rightInitCmd = true;
+					continue;
+				}
+
+				if (rightInitCmd && rxCh == Const.RESPONSE_INIT_DEVICE[responseCount]) {
+					responseCount++;
+				}
+			}
 		} catch (SerialPortException e) {
 			e.printStackTrace();
 		}
-		if (rxDataBuff[0] == Const.RESPONSE_INIT_DEVICE[responseCount]) {
-			responseCount++;
-		}
+
 		if (responseCount == Const.RESPONSE_INIT_DEVICE.length) {
+			System.out.println("Device found !");
 			isDeviceFound = true;
 			responseCount = 0;
-			isCmd = true;
 		}
 	}
 
 	/**
-	 * Чтение результата измерения.
-	 * Выполняеться чтение атомарного ацп преобразования.
+	 * Write request package to server
+	 *
+	 * @param pck package writes to port
 	 */
-	private void readMsrResult() {
-		if (uiEntry.isStartMsrFlag()) {
-			try {
-				rxDataBuff = serialPort.readIntArray();
-				if (rxDataBuff != null) {
-					callbackADCData.addAdcVal(rxDataBuff[0]);
-				}
-			}
-			catch (SerialPortException ex) {
-				System.out.println(ex);
-				System.out.println("error - public void serialEvent(SerialPortEvent event)");
-			}
+	public void writeRqPck(int[] pck) {
+		try {
+			serialPort.writeIntArray(pck);
+		} catch (SerialPortException e) {
+			e.printStackTrace();
 		}
 	}
 
