@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 /**
  * Управление и обработка действий UI
  */
-public class UIEntry implements UART.CallbackADCData{
+public class UIEntry implements UART.CallbackUI {
 
 	private static final Logger log = Logger.getLogger(UIEntry.class.getSimpleName());
 	private static UI ui;

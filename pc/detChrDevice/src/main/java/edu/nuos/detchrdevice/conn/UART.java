@@ -13,7 +13,10 @@ import jssc.SerialPortException;
  */
 public class UART {
 
-	private CallbackADCData callbackADCData;
+	/**
+	 * Обратный вызов для GUI. 
+	 */
+	private CallbackUI callbackUI;
 	private SerialPort serialPort;
 	private UIEntry uiEntry;
 
@@ -42,7 +45,7 @@ public class UART {
 
 	public UART(UIEntry uiEntry) {
 		this.uiEntry = uiEntry;
-		callbackADCData = uiEntry;
+		callbackUI = uiEntry;
 	}
 
 	/**
@@ -146,7 +149,7 @@ public class UART {
 			switch (cmd) {
 				case Const.CMD_MAKING_MSR:
 					data = rxDataBuff[1] & 0xFF;
-					callbackADCData.addAdcVal(data);
+					callbackUI.addAdcVal(data);
 //					System.out.println("making msr, data=" + data);
 					break;
 
@@ -156,12 +159,12 @@ public class UART {
 
 				case Const.CMD_MAKING_PARKING:
 					System.out.println("Make parking ...");
-					callbackADCData.blockUI(true);
+					callbackUI.blockUI(true);
 					break;
 
 				case Const.CMD_STOP_PARKING:
 					System.out.println("Parking is done.");
-					callbackADCData.blockUI(false);
+					callbackUI.blockUI(false);
 					break;
 			}
 
@@ -232,7 +235,7 @@ public class UART {
 	 * Этот интерфейс должен реализовать тот класс, который
 	 * будет обрабатвыать получаемые результаты от COM порта устройства.
 	 */
-	public interface CallbackADCData {
+	public interface CallbackUI {
 		/**
 		 * Метод должен вызываться при получении с COM порта данных.
 		 * @param val значение
