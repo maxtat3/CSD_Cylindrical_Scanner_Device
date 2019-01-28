@@ -20,9 +20,32 @@ public class UI {
 	private JButton btnRunMsr = null;
 	private JComboBox jcmboxComPort;
 	private JCheckBox jchbRecordData;
+	private JLabel jlServerStatus;
 	private Chart2D chart;
 	private ITrace2D trace;
 	private JFrame mainFrame;
+
+
+	public enum ServerStatus {
+		MAKING_MSR("Выполнение измерений"),
+		MSR_IS_MANUAL_INTERRUPTED("Остановка измерений"),
+		PARKING("Парковка"),
+		STAND_BY("Ожидание действий");
+
+		private String status;
+
+		ServerStatus(String status) {
+			this.status = status;
+		}
+
+		public String getStatus() {
+			return status;
+		}
+
+		public void setStatus(String status) {
+			this.status = status;
+		}
+	}
 
 
 	private UI(){
@@ -64,6 +87,9 @@ public class UI {
 		jchbRecordData.setFont(Const.DEFAULT_FONT);
 		jchbRecordData.setMnemonic(Const.HOT_KEY_RECORD);
 
+		jlServerStatus = new JLabel();
+		jlServerStatus.setFont(Const.DEFAULT_FONT);
+
 		buildChartUI();
 
 		JPanel jpDir = new JPanel();
@@ -73,6 +99,7 @@ public class UI {
 		jpDir.add(jcmboxComPort);
 		jpDir.add(Box.createHorizontalStrut(12));
 		jpDir.add(jchbRecordData);
+		jpDir.add(jlServerStatus);
 		jpChart.add(chart);
 
 		mainFrame = new JFrame("Установка исследования процессов при активации поверхностей " +
@@ -144,6 +171,10 @@ public class UI {
 
 	public JComboBox getJcmboxComPort() {
 		return jcmboxComPort;
+	}
+
+	public JLabel getJlServerStatus() {
+		return jlServerStatus;
 	}
 
 	public ITrace2D getTrace() {

@@ -168,6 +168,11 @@ public class UIEntry implements UART.CallbackUI {
 		ui.getJcmboxComPort().setEnabled( !makeBlock);
 	}
 
+	@Override
+	public void setServerStatus(UI.ServerStatus status) {
+		ui.getJlServerStatus().setText(status.getStatus());
+	}
+
 	/**
 	 * Округление дробного числа с ошибкой машинного округления.
 	 * @param dig дробное число

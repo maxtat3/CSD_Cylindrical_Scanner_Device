@@ -1,6 +1,7 @@
 package edu.nuos.detchrdevice.conn;
 
 import edu.nuos.detchrdevice.app.Const;
+import edu.nuos.detchrdevice.gui.UI;
 import edu.nuos.detchrdevice.gui.UIEntry;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -14,7 +15,7 @@ import jssc.SerialPortException;
 public class UART {
 
 	/**
-	 * Обратный вызов для GUI. 
+	 * Обратный вызов для GUI.
 	 */
 	private CallbackUI callbackUI;
 	private SerialPort serialPort;
@@ -151,20 +152,24 @@ public class UART {
 					data = rxDataBuff[1] & 0xFF;
 					callbackUI.addAdcVal(data);
 //					System.out.println("making msr, data=" + data);
+					callbackUI.setServerStatus(UI.ServerStatus.MAKING_MSR);
 					break;
 
 				case Const.CMD_STOP_MSR:
 					System.out.println("stop msr");
+					callbackUI.setServerStatus(UI.ServerStatus.MSR_IS_MANUAL_INTERRUPTED);
 					break;
 
 				case Const.CMD_MAKING_PARKING:
 					System.out.println("Make parking ...");
 					callbackUI.blockUI(true);
+					callbackUI.setServerStatus(UI.ServerStatus.PARKING);
 					break;
 
 				case Const.CMD_STOP_PARKING:
 					System.out.println("Parking is done.");
 					callbackUI.blockUI(false);
+					callbackUI.setServerStatus(UI.ServerStatus.STAND_BY);
 					break;
 			}
 
@@ -213,6 +218,7 @@ public class UART {
 
 		if (responseCount == Const.RESPONSE_INIT_DEVICE.length) {
 			System.out.println("Device found !");
+			callbackUI.setServerStatus(UI.ServerStatus.STAND_BY);
 			isDeviceFound = true;
 			responseCount = 0;
 		}
@@ -238,15 +244,25 @@ public class UART {
 	public interface CallbackUI {
 		/**
 		 * Метод должен вызываться при получении с COM порта данных.
+		 *
 		 * @param val значение
 		 */
 		void addAdcVal(int val);
 
 		/**
 		 * Блокирование элеменотов GUI при выполнении определенных действий со стороны сервера.
+		 *
 		 * @param makeBlock true - выполнить блокировку, false - разблокировать
 		 */
 		void blockUI(boolean makeBlock);
+
+		/**
+		 * Установка статуса сервера.
+		 * Позволяет отобразить состояние сервера в каждый момент времени.
+		 *
+		 * @param status статус
+		 */
+		void setServerStatus(UI.ServerStatus status);
 	}
 
 	public SerialPort getSerialPort() {
