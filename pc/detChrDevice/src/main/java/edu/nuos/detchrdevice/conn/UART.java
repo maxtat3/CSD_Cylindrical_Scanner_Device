@@ -153,6 +153,16 @@ public class UART {
 				case Const.CMD_STOP_MSR:
 					System.out.println("stop msr");
 					break;
+
+				case Const.CMD_MAKING_PARKING:
+					System.out.println("Make parking ...");
+					callbackADCData.blockUI(true);
+					break;
+
+				case Const.CMD_STOP_PARKING:
+					System.out.println("Parking is done.");
+					callbackADCData.blockUI(false);
+					break;
 			}
 
 		} catch (SerialPortException e) {
@@ -228,6 +238,12 @@ public class UART {
 		 * @param val значение
 		 */
 		void addAdcVal(int val);
+
+		/**
+		 * Блокирование элеменотов GUI при выполнении определенных действий со стороны сервера.
+		 * @param makeBlock true - выполнить блокировку, false - разблокировать
+		 */
+		void blockUI(boolean makeBlock);
 	}
 
 	public SerialPort getSerialPort() {

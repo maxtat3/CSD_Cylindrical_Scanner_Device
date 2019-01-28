@@ -161,6 +161,13 @@ public class UIEntry implements UART.CallbackADCData{
 		sampleLenCount = roundDouble(sampleLenCount + SAMPLE_LEN_DELTA);
 	}
 
+	@Override
+	public void blockUI(boolean makeBlock) {
+		ui.getBtnRunMsr().setEnabled( !makeBlock);
+		ui.getJchbRecordData().setEnabled( !makeBlock);
+		ui.getJcmboxComPort().setEnabled( !makeBlock);
+	}
+
 	/**
 	 * Округление дробного числа с ошибкой машинного округления.
 	 * @param dig дробное число

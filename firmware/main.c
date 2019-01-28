@@ -111,6 +111,9 @@ static uint32_t data = 0;
 static uint8_t txPckBuff[TX_BUFF_SIZE];
 
 
+/** Формирование RSP пакта без данных для отправки на сервер **/
+void codingRspPck0(uint8_t cmd);
+
 /** Формирование RSP пакта с 1-м Байтом данных для отправки на сервер **/
 void codingRspPck8(uint8_t data, uint8_t cmd);
 
@@ -252,10 +255,14 @@ ISR(TIMER1_OVF_vect){
 		}else if (pcCommand == DO_STOP_SM){
 			isDisableForward = true;
 			stepCount = 3;
+			codingRspPck0(CMD_MAKING_PARKING);
+			sendPckToUART(txPckBuff);
 		}
 	}else if(!isDisableForward){
 		isDisableForward = true;
 		stepCount = 3;
+		codingRspPck0(CMD_MAKING_PARKING);
+		sendPckToUART(txPckBuff);
 		_delay_ms(300);
 	}
 
@@ -277,6 +284,8 @@ ISR(TIMER1_OVF_vect){
 		smProgressCount = 0;
 		turnOffTC1();
 		ind_led_msr_state(false, false, 0);
+		codingRspPck0(CMD_STOP_PARKING);
+		sendPckToUART(txPckBuff);
 	}
 
 	if (!isDisableForward){
@@ -287,6 +296,12 @@ ISR(TIMER1_OVF_vect){
 }
 
 
+void codingRspPck0(uint8_t cmd) {
+	*(txPckBuff) = cmd & 0xFF;
+	*(txPckBuff+1) = 0;
+	*(txPckBuff+2) = 0;
+	*(txPckBuff+3) = 0;
+}
 
 void codingRspPck8(uint8_t data, uint8_t cmd) {
 	*(txPckBuff) = cmd & 0xFF;
